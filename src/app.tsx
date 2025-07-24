@@ -1,39 +1,103 @@
-import { AppProviders } from '@/components/app-providers.tsx'
-import { AppLayout } from '@/components/app-layout.tsx'
-import { RouteObject, useRoutes } from 'react-router'
-import { lazy } from 'react'
+import { AppProviders } from '@/components/app-providers.tsx';
+import { AppLayout } from '@/components/app-layout.tsx';
+import { RouteObject, useRoutes } from 'react-router';
+import { lazy, Suspense, useMemo } from 'react';
+import { ConnectionProvider } from '@solana/wallet-adapter-react';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { clusterApiUrl } from '@solana/web3.js';
+import './index.css';
+
+
+const LazyAccountIndex = lazy(() => import('./Index'));
+// const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'));
+const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'));
+const LazyInterest = lazy(() => import('@/components/interest/interest-feature'));
+const LazyDeposit = lazy(() => import('@/components/interest/depositToken'));
+const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw'));
+const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'));
+const LazyclaimLiquidity = lazy(() => import('@/components/interest/withdrawLiq'));
+const LazyLiquidate = lazy(() => import('@/components/interest/liquidate'));
+const NotFound = lazy(() => import('./components/Not-Found'));
 
 const links = [
-  //
   { label: 'Home', path: '/' },
-  { label: 'Account', path: '/account' },
-  { label: 'Counter Program', path: '/counter' },
-]
-
-const LazyAccountIndex = lazy(() => import('@/components/account/account-index-feature'))
-const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'))
-const LazyCounter = lazy(() => import('@/components/counter/counter-feature'))
-const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'))
+  { label: 'Interest Program', path: '/interest' },
+  { label: 'Deposit Token', path: '/deposit' },
+  { label: 'Your Deposits', path: '/depositList' },
+  { label: 'Provide Liquidity', path: '/liquidity' },
+  { label: 'Claim Liquidity', path: '/claimliquidity' },
+  { label: 'Liquidate', path: '/liquidate' },
+];
 
 const routes: RouteObject[] = [
-  { index: true, element: <LazyDashboard /> },
   {
-    path: 'account',
-    children: [
-      { index: true, element: <LazyAccountIndex /> },
-      { path: ':address', element: <LazyAccountDetail /> },
-    ],
+    path: '/',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyAccountIndex /></Suspense>,
+    index: true,
   },
-  { path: 'counter', element: <LazyCounter /> },
-]
+  // {
+  //   path: 'account',
+  //   children: [
+  //     {
+  //       index: true,
+  //       element: <Suspense fallback={<div>Loading...</div>}><LazyAccountIndex /></Suspense>,
+  //     },
+  //     {
+  //       path: ':address',
+  //       element: <Suspense fallback={<div>Loading...</div>}><LazyAccountDetail /></Suspense>,
+  //     },
+  //   ],
+  // },
+  {
+    path: 'interest',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyInterest /></Suspense>,
+  },
+  {
+    path: 'deposit',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyDeposit /></Suspense>,
+  },
+  {
+    path: 'depositList',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyDepositList /></Suspense>,
+  },
+  {
+    path: 'liquidity',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyLiquidity /></Suspense>,
+  },
+  {
+    path: 'claimliquidity',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyclaimLiquidity /></Suspense>,
+  },
+  {
+    path: 'liquidate',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyLiquidate /></Suspense>,
+  },
+  {
+    path: '*',
+    element: <Suspense fallback={<div>Loading...</div>}><NotFound /></Suspense>,
+  },
+];
 
-console.log({ links, routes })
 
 export function App() {
-  const router = useRoutes(routes)
+  const router = useRoutes(routes);
+
+  // Solana wallet setup
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+
+
   return (
-    <AppProviders>
-      <AppLayout links={links}>{router}</AppLayout>
-    </AppProviders>
-  )
+    <ConnectionProvider endpoint={endpoint}>
+      {/* <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider> */}
+      <AppProviders>
+        <AppLayout links={links}>
+          {router}
+        </AppLayout>
+      </AppProviders>
+      {/* </WalletModalProvider> */}
+      {/* </WalletProvider> */}
+    </ConnectionProvider>
+  );
 }
