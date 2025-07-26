@@ -20,7 +20,7 @@ const mintToPriceFeedMap: Record<string, string> = {
 };
 
 const HARDCODED_MINTS: Record<string, BN> = {
-    "EyF4B3dcWnahy4VAKU54b2MbDdTRboF6LUBpTjaRbqGZ": new BN(10000), // for demo
+    "DTWRv9dFfLjswbSqMJi1aEBCMtDgKB2p1FwTzJGFAJq": new BN(30000), // for demo
 };
 
 export async function getPriceForMint(mint: string): Promise<BN> {

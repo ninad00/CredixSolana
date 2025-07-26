@@ -8,7 +8,7 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-pub fn deposit_token(mut ctx: Context<DepositToken>, amount: u64) -> Result<()> {
+pub fn deposit_token(mut ctx: &mut Context<DepositToken>, amount: u64) -> Result<()> {
     let deposit = &mut ctx.accounts.deposit;
     let user_key = ctx.accounts.user.key();
 

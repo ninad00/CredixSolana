@@ -5,7 +5,7 @@ import type { Interest } from '../target/types/interest.ts'
 import { AnchorWallet, } from '@solana/wallet-adapter-react'
 export { Interest, InterestIDL }
 
-export const DSC_MINT = "EyF4B3dcWnahy4VAKU54b2MbDdTRboF6LUBpTjaRbqGZ";
+export const DSC_MINT = "CtcrDyJsKaUY6AFueV6CSrBpeiA6Ua6NCd4Xspb4Y4Fe";
 
 export const CLUSTER_URL = "https://api.devnet.solana.com";
 export const Interest_PROGRAM_ID = new PublicKey(InterestIDL.address);

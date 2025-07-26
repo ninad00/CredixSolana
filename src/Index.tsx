@@ -48,8 +48,7 @@ const Index = () => {
                     </div>
                 </div>
             </header>
-
-            {/* Hero Section */}
+                                                              
             <section className="container mx-auto px-6 py-16">
                 <div className="text-center mb-16">
                     <Badge variant="secondary" className="mb-4 bg-gray-800 text-gray-300 border-gray-700">

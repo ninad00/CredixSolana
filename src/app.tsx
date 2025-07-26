@@ -17,6 +17,7 @@ const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw')
 const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'));
 const LazyclaimLiquidity = lazy(() => import('@/components/interest/withdrawLiq'));
 const LazyLiquidate = lazy(() => import('@/components/interest/liquidate'));
+const LazyHistory = lazy(() => import('@/components/interest/transaction'));
 const NotFound = lazy(() => import('./components/Not-Found'));
 
 const links = [
@@ -27,6 +28,7 @@ const links = [
   { label: 'Provide Liquidity', path: '/liquidity' },
   { label: 'Claim Liquidity', path: '/claimliquidity' },
   { label: 'Liquidate', path: '/liquidate' },
+  { label: 'History', path: '/history' },
 ];
 
 const routes: RouteObject[] = [
@@ -71,6 +73,10 @@ const routes: RouteObject[] = [
   {
     path: 'liquidate',
     element: <Suspense fallback={<div>Loading...</div>}><LazyLiquidate /></Suspense>,
+  },
+  {
+    path: 'history',
+    element: <Suspense fallback={<div>Loading...</div>}><LazyHistory /></Suspense>,
   },
   {
     path: '*',

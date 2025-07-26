@@ -29,11 +29,11 @@ pub fn initialize_engine(
     engine.bump = ctx.bumps.engine;
     Ok(())
 }
-pub fn mint_dsc(ctx: Context<MintDSC>, amount: u64, new_price: u64) -> Result<()> {
+pub fn mint_dsc(mut ctx: &mut Context<MintDSC>, amount: u64, new_price: u64) -> Result<()> {
     if amount == 0 {
         return Err(ErrorCode::AmountLessThanZero.into());
     }
-    let amt = amount.checked_div(1000).unwrap();
+    // let amt = amount.checked_div(1000).unwrap();
 
     // Update the oracle price
     let price = &mut ctx.accounts.price;
@@ -49,7 +49,7 @@ pub fn mint_dsc(ctx: Context<MintDSC>, amount: u64, new_price: u64) -> Result<()
     // Safely calculate new borrowed amount
     let new_borrowed = user_data
         .borrowed_amount
-        .checked_add(amt)
+        .checked_add(amount)
         .ok_or(ErrorCode::Overflow)?;
 
     // Calculate health factor with the new debt
@@ -95,13 +95,18 @@ pub fn mint_dsc(ctx: Context<MintDSC>, amount: u64, new_price: u64) -> Result<()
     Ok(())
 }
 
-pub fn liquidate(ctx: Context<Liquidate>, debt_to_cover: u64, new_price: u64) -> Result<()> {
+pub fn liquidate(
+    mut ctx: &mut Context<Liquidate>,
+    debt_to_cover: u64,
+    new_price: u64,
+) -> Result<()> {
     require!(debt_to_cover > 0, ErrorCode::AmountLessThanZero);
 
     let engine = &ctx.accounts.engine;
     let user_data = &mut ctx.accounts.user_data;
     let deposit = &mut ctx.accounts.deposit;
-    let dsc_amt = debt_to_cover / 1000;
+    // let dsc_amt = debt_to_cover / 1000;
+    let dsc_amt = debt_to_cover;
     require!(
         ctx.accounts.liquidator.key() != user_data.user,
         ErrorCode::CannotLiquidateSelf
@@ -110,16 +115,19 @@ pub fn liquidate(ctx: Context<Liquidate>, debt_to_cover: u64, new_price: u64) ->
         dsc_amt <= user_data.borrowed_amount,
         ErrorCode::TooMuchRepay
     );
+    // Fetch DSC balance of the liquidator
+    let liquidator_dsc_balance = ctx.accounts.liquidator_dsc_account.amount;
+
+    require!(
+        liquidator_dsc_balance >= debt_to_cover,
+        ErrorCode::LiquidatorInsufficientDSC
+    );
 
     let price = &mut ctx.accounts.price;
     price.price = new_price;
 
-    let initial_health = calculate_health_factor_with_debt(
-        deposit,
-        price,
-        engine,
-        user_data.borrowed_amount - dsc_amt,
-    )?;
+    let initial_health =
+        calculate_health_factor_with_debt(deposit, price, engine, user_data.borrowed_amount)?;
     require!(
         initial_health < engine.min_health_factor,
         ErrorCode::NoNeedToLiquidate
@@ -136,7 +144,7 @@ pub fn liquidate(ctx: Context<Liquidate>, debt_to_cover: u64, new_price: u64) ->
     burn(burn_ctx, debt_to_cover)?;
 
     let dsc_collateral_equiv = convert_dsc_to_collateral(dsc_amt, price)?;
-    let bonus = (dsc_collateral_equiv * engine.liquidation_bonus) / 100;
+    let bonus = (dsc_collateral_equiv * 10) / 100;
     let total_liquidator_reward = dsc_collateral_equiv + bonus;
 
     require!(

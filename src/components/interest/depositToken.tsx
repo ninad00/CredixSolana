@@ -11,6 +11,7 @@ import {
     createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import { AnchorProvider } from "@coral-xyz/anchor";
+import { uploadHf } from "./hf.tsx";
 
 // Interfaces
 interface Config {
@@ -162,7 +163,6 @@ export default function ConfigList() {
                 console.log("Created associated token account:", sig);
             }
 
-            // Create deposit transaction
             const transaction = await program.methods
                 .depositCollateral(depositAmount)
                 .accountsStrict({
@@ -207,7 +207,15 @@ export default function ConfigList() {
                 [config.tokenMint]: new BN(0)
             }));
 
-            // Refresh configs to get updated totalLiq and totalCollected
+            const hfbn = await uploadHf(takerPublicKey, tokenMint, program);
+
+            await program.methods.temp(hfbn).accountsStrict({
+                user: takerPublicKey,
+                userData: userPDA,
+                tokenMint: tokenMint
+
+            }).rpc();
+
             try {
                 const updatedConfigs = await fetchAllConfigsOnChain(wallet);
                 setConfigs(updatedConfigs);

@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/interest.json`.
  */
 export type Interest = {
-  "address": "88tXn9rAFm1HwM8fjmMrZJymZEy17GEDmD5dmNmqTiAC",
+  "address": "J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY",
   "metadata": {
     "name": "interest",
     "version": "0.1.0",
@@ -185,110 +185,6 @@ export type Interest = {
       "args": [
         {
           "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "getHf",
-      "discriminator": [
-        174,
-        46,
-        83,
-        47,
-        188,
-        189,
-        17,
-        183
-      ],
-      "accounts": [
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "userData",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "account",
-                "path": "tokenMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "engine",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  101,
-                  110,
-                  103,
-                  105,
-                  110,
-                  101
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "tokenMint",
-          "relations": [
-            "price"
-          ]
-        },
-        {
-          "name": "price",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  105,
-                  99,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "tokenMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "tokenProgram"
-        }
-      ],
-      "args": [
-        {
-          "name": "newPrice",
           "type": "u64"
         }
       ]
@@ -2120,6 +2016,10 @@ export type Interest = {
     {
       "code": 6016,
       "name": "overCollateralLimit"
+    },
+    {
+      "code": 6017,
+      "name": "liquidatorInsufficientDsc"
     }
   ],
   "types": [

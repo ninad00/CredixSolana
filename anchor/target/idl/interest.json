@@ -1,5 +1,5 @@
 {
-  "address": "88tXn9rAFm1HwM8fjmMrZJymZEy17GEDmD5dmNmqTiAC",
+  "address": "J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY",
   "metadata": {
     "name": "interest",
     "version": "0.1.0",
@@ -179,110 +179,6 @@
       "args": [
         {
           "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "get_hf",
-      "discriminator": [
-        174,
-        46,
-        83,
-        47,
-        188,
-        189,
-        17,
-        183
-      ],
-      "accounts": [
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "user_data",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  117,
-                  115,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "account",
-                "path": "token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "engine",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  101,
-                  110,
-                  103,
-                  105,
-                  110,
-                  101
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "token_mint",
-          "relations": [
-            "price"
-          ]
-        },
-        {
-          "name": "price",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  105,
-                  99,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_mint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "token_program"
-        }
-      ],
-      "args": [
-        {
-          "name": "new_price",
           "type": "u64"
         }
       ]
@@ -2114,6 +2010,10 @@
     {
       "code": 6016,
       "name": "OverCollateralLimit"
+    },
+    {
+      "code": 6017,
+      "name": "LiquidatorInsufficientDSC"
     }
   ],
   "types": [

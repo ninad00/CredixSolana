@@ -28,4 +28,5 @@ pub enum ErrorCode {
     CannotLiquidateSelf,
     TooMuchRepay,
     OverCollateralLimit,
+    LiquidatorInsufficientDSC,
 }

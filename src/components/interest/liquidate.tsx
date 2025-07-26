@@ -12,6 +12,7 @@ import {
 } from "@solana/spl-token";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { getPriceForMint } from "../providers/tp.ts";
+import { uploadHf } from "./hf.tsx";
 
 interface Deposit {
     publicKey: string;
@@ -48,7 +49,7 @@ interface DepositState {
 const parseAmountInput = (val: string): BN => {
     const parsed = parseFloat(val);
     if (isNaN(parsed) || parsed < 0) return new BN(0);
-    return new BN(Math.floor(parsed * 1e9));
+    return new BN(Math.floor(parsed * 1e6));
 };
 
 export default function LiquidationList() {
@@ -123,6 +124,11 @@ export default function LiquidationList() {
                 await conn.confirmTransaction({ blockhash, lastValidBlockHeight, signature: sig });
             }
 
+            console.log("Liquidator DSC ATA:", liquidatorDSCAccount.toBase58());
+            const bal = await conn.getTokenAccountBalance(liquidatorDSCAccount);
+            console.log("DSC Balance:", bal.value.amount);
+
+
             const info2 = await conn.getAccountInfo(liquidatorTokenAccount);
             if (!info2) {
                 const ix = createAssociatedTokenAccountInstruction(liquidator, liquidatorTokenAccount, liquidator, tokenMint);
@@ -153,6 +159,19 @@ export default function LiquidationList() {
                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             }).rpc();
 
+            updateDepositState(uniqueKey, {
+                isProcessing: false,
+                txSig: sig
+            });
+
+            const hfbn = await uploadHf(user, tokenMint, program);
+
+            await program.methods.temp(hfbn).accountsStrict({
+                user: user,
+                userData: userPDA,
+                tokenMint: tokenMint
+
+            }).rpc();
             updateDepositState(uniqueKey, {
                 isProcessing: false,
                 txSig: sig
@@ -325,6 +344,10 @@ export default function LiquidationList() {
                                                     <p className="text-xs text-gray-500">Borrowed</p>
                                                     <p className="text-sm text-gray-200">{(parseFloat(userData.borrowedAmount) / 1000000).toFixed(6)}</p>
                                                 </div>
+                                                {/* <div>
+                                                    <p className="text-xs text-gray-500">To liquidate</p>
+                                                    <p className="text-sm text-gray-200">{((Number(userData.tokenBalance) * (prices[deposit.tokenMint] / 10000)) - Number(userData.borrowedAmount)) / 1000000}</p>
+                                                </div> */}
                                                 <div>
                                                     <p className="text-xs text-gray-500">Balance</p>
                                                     <p className="text-sm text-gray-200">{(parseFloat(userData.tokenBalance) / 1000000).toFixed(6)}</p>
@@ -347,7 +370,7 @@ export default function LiquidationList() {
                                                         type="number"
                                                         step="any"
                                                         min="0"
-                                                        value={(Number(state.debtToCover.toString()) / 1e9).toString()}
+                                                        value={(Number(state.debtToCover.toString()) / 1e6).toString()}
 
                                                         placeholder="Mint amount"
                                                         onChange={(e) => {

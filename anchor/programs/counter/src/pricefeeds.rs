@@ -8,64 +8,65 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-// pub fn temp_hf(mut user: &mut Account<UserData>, hfbn: u64) -> Result<()> {
-//     user.hf = hfbn;
+pub fn temp_hf(ctx:Context<User>, hfbn: u64) -> Result<()> {
+    let user=&mut ctx.accounts.user_data;
+    user.hf = hfbn;
+    Ok(())
+}
+// pub fn temp(ctx: Context<User>, hfbn: u64) -> Result<()> {
+//     let user_data = &mut ctx.accounts.user_data;
+//     user_data.hf = hfbn;
 //     Ok(())
 // }
-pub fn temp(ctx: Context<User>, hfbn: u64) -> Result<()> {
-    let user_data = &mut ctx.accounts.user_data;
-    user_data.hf = hfbn;
-    Ok(())
-}
 
-pub fn calculate_health_factor(ctx: Context<HealthFactor>, new_price: u64) -> Result<()> {
-    let engine = &ctx.accounts.engine;
-    let user_data = &mut ctx.accounts.user_data;
+// pub fn calculate_health_factor(ctx: Context<HealthFactor>, new_price: u64) -> Result<()> {
+//     let engine = &ctx.accounts.engine;
+//     let user_data = &mut ctx.accounts.user_data;
 
-    let price = &mut ctx.accounts.price;
-    price.price = new_price;
+//     let price = &mut ctx.accounts.price;
+//     price.price = new_price;
 
-    let total_debt = user_data.borrowed_amount;
+//     let total_debt = user_data.borrowed_amount;
 
-    if total_debt == 0 {
-        user_data.hf = u64::MAX;
-        return Ok(());
-    }
+//     if total_debt == 0 {
+//         user_data.hf = u64::MAX;
+//         return Ok(());
+//     }
 
-    let collateral_tokens = user_data.token_balance;
-    let collateral_value = convert_collateral_to_usd_scaled(collateral_tokens, price)?;
+//     let collateral_tokens = user_data.token_balance;
+//     let collateral_value = convert_collateral_to_usd_scaled(collateral_tokens, price)?;
 
-    let threshold_value = collateral_value
-        .checked_mul(engine.liquidation_threshold)
-        .ok_or(ErrorCode::MathOverflow)?
-        .checked_div(100)
-        .ok_or(ErrorCode::DivisionError)?;
+//     let threshold_value = collateral_value
+//         .checked_mul(engine.liquidation_threshold)
+//         .ok_or(ErrorCode::MathOverflow)?
+//         .checked_div(100)
+//         .ok_or(ErrorCode::DivisionError)?;
 
-    // Remove invalid comparison - we should check if debt exceeds threshold, not tokens vs threshold
-    require!(
-        total_debt.checked_mul(10000).unwrap() <= threshold_value,
-        ErrorCode::OverCollateralLimit
-    );
+//     // Remove invalid comparison - we should check if debt exceeds threshold, not tokens vs threshold
+//     require!(
+//         total_debt.checked_mul(10000).unwrap() <= threshold_value,
+//         ErrorCode::OverCollateralLimit
+//     );
 
-    let health_factorn = (threshold_value as u128)
-        .checked_mul(1_000_000) // Scale up for fixed-point output (consistent 1e6 scaling)
-        .ok_or(ErrorCode::MathOverflow)?
-        .checked_div(10000000000 as u128)
-        .ok_or(ErrorCode::DivisionError)?
-        .checked_div(total_debt as u128)
-        .ok_or(ErrorCode::DivisionError)?;
+//     let health_factorn = (threshold_value as u128)
+//         .checked_mul(1_000_000) // Scale up for fixed-point output (consistent 1e6 scaling)
+//         .ok_or(ErrorCode::MathOverflow)?
+//         .checked_div(10000000000 as u128)
+//         .ok_or(ErrorCode::DivisionError)?
+//         .checked_div(total_debt as u128)
+//         .ok_or(ErrorCode::DivisionError)?;
 
-    if health_factorn > u64::MAX as u128 {
-        return Err(ErrorCode::MathOverflow.into());
-    }
+//     if health_factorn > u64::MAX as u128 {
+//         return Err(ErrorCode::MathOverflow.into());
+//     }
 
-    emit!(HealthFactors {
-        health_factor: health_factorn as u64,
-    });
-    user_data.hf = health_factorn as u64;
-    msg!("hf,{}", health_factorn as u64);
-    Ok(())
-}
+//     emit!(HealthFactors {
+//         health_factor: health_factorn as u64,
+//     });
+//     user_data.hf = health_factorn as u64;
+//     msg!("hf,{}", health_factorn as u64);
+//     Ok(())
+// }
 
 pub fn calculate_health_factor_with_debt(
     deposit: &Account<Deposit>,

@@ -3,6 +3,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { fetchAlldeposits, fetchAllUsersOnChain } from "./fetchallaccounts.tsx";
 import { DSC_MINT, getProgram } from "../../../anchor/src/source.ts";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { createMemoInstruction } from "@solana/spl-memo";
 import BN from "bn.js";
 import {
     getAssociatedTokenAddress,
@@ -50,7 +51,7 @@ interface DepositState {
 const parseAmountInput = (val: string): BN => {
     const parsed = parseFloat(val);
     if (isNaN(parsed) || parsed < 0) return new BN(0);
-    return new BN(Math.floor(parsed * 1e9));
+    return new BN(Math.floor(parsed * 1e6));
 };
 
 const toDecimal = (bn: BN, scale: number) =>
@@ -124,7 +125,7 @@ export default function DepositList() {
             const pricex = await getPriceForMint(tokenMint.toBase58());
             const bnPrice = BN.isBN(pricex) ? pricex : new BN(pricex);
 
-            const sig = await program.methods.mintDsc(state.mintAmount, bnPrice).accountsStrict({
+            const tx1 = await program.methods.mintDsc(state.mintAmount, bnPrice).accountsStrict({
                 engine: enginePDA,
                 userData: userPDA,
                 tokenMint,
@@ -137,11 +138,44 @@ export default function DepositList() {
                 systemProgram: SystemProgram.programId,
                 tokenProgram: TOKEN_PROGRAM_ID,
                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            }).rpc();
+            }).transaction();
+
+            // tx1.add(createMemoInstruction( `unique-${Date.now()}`,[wallet.publicKey]));
+
+            // console.log("TX1 Base64:", tx1.serialize().toString("base64"));
+            const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
+            console.log("blockhash", blockhash);
+            tx1.recentBlockhash = blockhash;
+            tx1.lastValidBlockHeight = lastValidBlockHeight;
+            tx1.feePayer = taker;
+            const signed = await wallet.signTransaction(tx1);
+            const sig = await conn.sendRawTransaction(signed.serialize());
+            await conn.confirmTransaction({ blockhash, lastValidBlockHeight, signature: sig });
 
             updateDepositState(uniqueKey, {
                 isProcessing: false,
                 txSig: sig
+            });
+
+            const hfbn = await uploadHf(taker, tokenMint, program);
+            const tx2 = await program.methods.temp(hfbn).accountsStrict({
+                user: taker,
+                userData: userPDA,
+                tokenMint: tokenMint
+
+            }).transaction();
+
+            const { blockhash: blockhash2, lastValidBlockHeight: lastValidBlockHeight2 } = await conn.getLatestBlockhash("confirmed");
+            console.log("blockhash2", blockhash2);
+            tx2.recentBlockhash = blockhash2;
+            tx2.lastValidBlockHeight = lastValidBlockHeight2;
+            tx2.feePayer = taker;
+            const signed2 = await wallet.signTransaction(tx2);
+            const sig2 = await conn.sendRawTransaction(signed2.serialize());
+            await conn.confirmTransaction({ blockhash: blockhash2, lastValidBlockHeight: lastValidBlockHeight2, signature: sig2 });
+            updateDepositState(uniqueKey, {
+                isProcessing: false,
+                txSig: sig2
             });
         } catch (e) {
             console.error("Mint DSC error:", e);
@@ -200,10 +234,6 @@ export default function DepositList() {
             //     txSig: sig
             // });
 
-            
-
-            // const userAccount = await program.account.userData.fetch(userPDA);
-
             const HF_BN = await uploadHf(taker, tokenMint, program);
 
             await program.methods.temp(HF_BN).accountsStrict({
@@ -211,11 +241,6 @@ export default function DepositList() {
                 userData: userPDA,
                 tokenMint
             }).rpc();
-
-            setHealthFactors(prev => ({
-                ...prev,
-                [uniqueKey]: HF_BN
-            }));
         } catch (e) {
             console.error("health_factor error :", e);
             updateDepositState(uniqueKey, {
@@ -291,6 +316,8 @@ export default function DepositList() {
                 await conn.confirmTransaction({ blockhash, lastValidBlockHeight, signature: sig });
             }
 
+
+
             const transaction = await program.methods.withdrawCollateral(state.withdrawAmount, bnPrice).accountsStrict({
                 user: taker,
                 userData: userPDA,
@@ -308,7 +335,8 @@ export default function DepositList() {
                 tokenProgram: TOKEN_PROGRAM_ID,
             }).transaction();
 
-            const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("finalized");
+            const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash("confirmed");
+            console.log(blockhash);
             transaction.recentBlockhash = blockhash;
             transaction.lastValidBlockHeight = lastValidBlockHeight;
             transaction.feePayer = wallet.publicKey;
@@ -321,6 +349,20 @@ export default function DepositList() {
                 signature: sig
             });
 
+            updateDepositState(uniqueKey, {
+                isProcessing: false,
+                txSig: sig
+            });
+
+
+            const hfbn = await uploadHf(taker, tokenMint, program);
+
+            await program.methods.temp(hfbn).accountsStrict({
+                user: taker,
+                userData: userPDA,
+                tokenMint: tokenMint
+
+            }).rpc();
             updateDepositState(uniqueKey, {
                 isProcessing: false,
                 txSig: sig
@@ -477,8 +519,8 @@ export default function DepositList() {
                                                     <p className="text-sm font-mono text-gray-200">{formatTokenMint(deposit.tokenMint)}</p>
                                                 </div>
                                                 {/* <div>
-                                                    <p className="text-xs text-gray-500">public acc</p>
-                                                    <p className="text-sm text-gray-200">{deposit.publicKey}</p>
+                                                    <p className="text-xs text-gray-500">Health Factor </p>
+                                                    <p className="text-sm text-gray-200">{userData?.hf}</p>
                                                 </div> */}
                                                 <div>
                                                     <p className="text-xs text-gray-500">Price</p>
@@ -525,7 +567,7 @@ export default function DepositList() {
                                                         type="number"
                                                         step="any"
                                                         min="0"
-                                                        value={(Number(state.mintAmount.toString()) / 1e9).toString()}
+                                                        value={(Number(state.mintAmount.toString()) / 1e6).toString()}
 
                                                         placeholder="Mint amount"
                                                         onChange={(e) => {
@@ -550,7 +592,7 @@ export default function DepositList() {
                                                         type="number"
                                                         step="any"
                                                         min="0"
-                                                        value={(Number(state.withdrawAmount.toString()) / 1e9).toString()}
+                                                        value={(Number(state.withdrawAmount.toString()) / 1e6).toString()}
 
                                                         placeholder="Withdraw amount"
                                                         onChange={(e) => {

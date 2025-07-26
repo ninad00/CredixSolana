@@ -9,7 +9,7 @@ use anchor_spl::{
 };
 
 pub fn redeem_collateral(
-    mut ctx: Context<WithdrawToken>,
+    mut ctx: &mut Context<WithdrawToken>,
     dsc_to_give: u64,
     new_price: u64,
 ) -> Result<()> {
@@ -60,7 +60,8 @@ pub fn redeem_collateral(
     );
     burn(burn_ctx, dsc_to_give)?;
 
-    let dsc_burn_scaled = (dsc_to_give) / 1000;
+    // let dsc_burn_scaled = (dsc_to_give) / 1000;
+    let dsc_burn_scaled = dsc_to_give;
     msg!("dsc, {}", dsc_burn_scaled);
     msg!("borr, {}", user_data.borrowed_amount);
 
