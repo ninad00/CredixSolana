@@ -10,7 +10,7 @@ import './index.css';
 
 const LazyAccountIndex = lazy(() => import('./Index'));
 // const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'));
-const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'));
+// const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'));
 const LazyInterest = lazy(() => import('@/components/interest/interest-feature'));
 const LazyDeposit = lazy(() => import('@/components/interest/depositToken'));
 const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw'));
@@ -94,7 +94,7 @@ export function App() {
 
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
+    <ConnectionProvider endpoint={endpoint} >
       {/* <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider> */}
       <AppProviders>

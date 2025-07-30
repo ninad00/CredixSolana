@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { fetchAllConfigsOnChain } from "./fetchallaccounts.tsx";
 import { getProgram } from "../../../anchor/src/source.ts";
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction, SendTransactionError } from "@solana/web3.js";
 import BN from "bn.js";
 import {
     getAssociatedTokenAddress,
@@ -12,8 +12,13 @@ import {
 } from "@solana/spl-token";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { uploadHf } from "./hf.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Coins, ExternalLink, CheckCircle, AlertCircle, Loader2, Wallet } from "lucide-react";
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Interfaces
+// --- Interfaces ---
 interface Config {
     publicKey: string;
     tokenMint: string;
@@ -23,11 +28,9 @@ interface Config {
     authority: string;
     bump: number;
 }
-
 interface DepositAmounts {
     [tokenMint: string]: BN;
 }
-
 interface TransactionStates {
     [tokenMint: string]: {
         isLoading: boolean;
@@ -36,10 +39,51 @@ interface TransactionStates {
     };
 }
 
-// const TOKEN_DECIMALS = 9;
-const DISPLAY_DECIMALS = 6; // For user input display
+// --- Constants & Helpers ---
+const DISPLAY_DECIMALS = 6;
 
-export default function ConfigList() {
+const parseAmountInput = (value: string): BN | null => {
+    if (!value) return new BN(0);
+    try {
+        const parts = value.split('.');
+        const integerPart = new BN(parts[0] || 0);
+        let fractionalPart = new BN(0);
+        if (parts[1]) {
+            const fractionalStr = parts[1].slice(0, DISPLAY_DECIMALS).padEnd(DISPLAY_DECIMALS, '0');
+            fractionalPart = new BN(fractionalStr);
+        }
+        const multiplier = new BN(10).pow(new BN(DISPLAY_DECIMALS));
+        return integerPart.mul(multiplier).add(fractionalPart);
+    } catch (error) {
+        return null;
+    }
+};
+
+const formatAmountForDisplay = (amount: BN): string => {
+    if (amount.isZero()) return '';
+    const divisor = new BN(10).pow(new BN(DISPLAY_DECIMALS));
+    const quotient = amount.div(divisor);
+    const remainder = amount.mod(divisor);
+    if (remainder.isZero()) return quotient.toString();
+    const remainderStr = remainder.toString().padStart(DISPLAY_DECIMALS, '0').replace(/0+$/, '');
+    return `${quotient.toString()}.${remainderStr || '0'}`;
+};
+
+// --- UI Components ---
+const LoadingSkeleton = () => (
+    <div className="space-y-6">
+        {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-gray-900/50 border-gray-800 rounded-xl p-6 space-y-4 animate-pulse">
+                <div className="h-6 bg-gray-700 rounded w-1/2"></div>
+                <div className="h-12 bg-gray-700 rounded"></div>
+                <div className="h-10 bg-gray-700 rounded w-full"></div>
+            </div>
+        ))}
+    </div>
+);
+
+// --- Main Component ---
+export default function DepositCollateral() {
     const wallet = useAnchorWallet();
     const [configs, setConfigs] = useState<Config[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -47,137 +91,99 @@ export default function ConfigList() {
     const [transactionStates, setTransactionStates] = useState<TransactionStates>({});
     const [error, setError] = useState<string | null>(null);
 
-
-    // Helper function to update transaction state for a specific token
     const updateTransactionState = useCallback((tokenMint: string, updates: Partial<TransactionStates[string]>) => {
-        setTransactionStates(prev => ({
-            ...prev,
-            [tokenMint]: {
-                ...prev[tokenMint],
-                ...updates
-            }
-        }));
+        setTransactionStates(prev => ({ ...prev, [tokenMint]: { ...prev[tokenMint], ...updates } }));
     }, []);
 
-    // Helper function to get transaction state for a token
     const getTransactionState = useCallback((tokenMint: string) => {
-        return transactionStates[tokenMint] || {
-            isLoading: false,
-            txSig: null,
-            error: null
-        };
+        return transactionStates[tokenMint] || { isLoading: false, txSig: null, error: null };
     }, [transactionStates]);
 
-    // Helper function to validate and parse amount input
-    const parseAmountInput = (value: string): BN | null => {
-        const numValue = Number(value);
-        if (isNaN(numValue) || numValue < 0) return null;
-
-        try {
-            // Convert to the smallest unit (using DISPLAY_DECIMALS for precision)
-            const rawAmount = new BN(Math.floor(numValue * Math.pow(10, DISPLAY_DECIMALS)));
-            return rawAmount;
-        } catch (error) {
-            return null;
-        }
-    };
-
-    const CreateDeposit = async (config: Config) => {
-        if (!wallet || !wallet.publicKey || !wallet.signTransaction) {
-            console.error("Wallet not connected or invalid");
-            return;
-        }
-
+    const handleDeposit = async (config: Config) => {
+        if (!wallet?.publicKey) return;
         const program = getProgram(wallet);
-        if (!program) {
-            console.error("Program not initialized");
-            return;
-        }
+        if (!program) return;
 
         const depositAmount = depositAmounts[config.tokenMint];
         if (!depositAmount || depositAmount.isZero()) {
-            updateTransactionState(config.tokenMint, {
-                error: "Please enter a valid amount"
-            });
+            updateTransactionState(config.tokenMint, { error: "Please enter a valid amount" });
             return;
         }
 
-        updateTransactionState(config.tokenMint, {
-            isLoading: true,
-            error: null,
-            txSig: null
-        });
-
-        const takerPublicKey = wallet.publicKey;
-        const tokenMint = new PublicKey(config.tokenMint);
-        const configPublicKey = new PublicKey(config.publicKey);
+        updateTransactionState(config.tokenMint, { isLoading: true, error: null, txSig: null });
 
         try {
-            const vaultATA = await getAssociatedTokenAddress(
-                tokenMint,
-                configPublicKey,
-                true,
-                TOKEN_PROGRAM_ID,
-                ASSOCIATED_TOKEN_PROGRAM_ID
-            );
-
-            console.log("vaultATA", vaultATA.toBase58());
-
-            const userTokenAccount = await getAssociatedTokenAddress(tokenMint, takerPublicKey);
-            console.log("usertoken", userTokenAccount.toBase58());
-            const [depositPDA] = PublicKey.findProgramAddressSync(
-                [Buffer.from("deposit"), takerPublicKey.toBuffer(), tokenMint.toBuffer()],
-                program.programId
-            );
-            console.log("dep", depositPDA.toBase58());
-            const [userPDA] = PublicKey.findProgramAddressSync(
-                [Buffer.from("user"), takerPublicKey.toBuffer(), tokenMint.toBuffer()],
-                program.programId
-            );
-            console.log("user", userPDA.toBase58());
+            const takerPublicKey = wallet.publicKey;
+            const tokenMint = new PublicKey(config.tokenMint);
+            const configPublicKey = new PublicKey(config.publicKey);
+            const vaultATA = await getAssociatedTokenAddress(tokenMint, configPublicKey, true);
             const connection = (program.provider as AnchorProvider).connection;
+            const userTokenAccount = await getAssociatedTokenAddress(tokenMint, takerPublicKey);
+            
+            // Check if user has the token account
+            const tokenAccountInfo = await connection.getAccountInfo(userTokenAccount);
+            if (!tokenAccountInfo) {
+                updateTransactionState(config.tokenMint, { 
+                    isLoading: false, 
+                    error: `Token account ${userTokenAccount.toString()} does not exist. Please ensure you have some tokens to deposit.` 
+                });
+                return;
+            }
+            
+            // Get token balance
+            const tokenBalance = await connection.getTokenAccountBalance(userTokenAccount);
+            console.log('Token balance:', {
+                mint: tokenMint.toString(),
+                userTokenAccount: userTokenAccount.toString(),
+                balance: tokenBalance.value.uiAmount,
+                decimals: tokenBalance.value.decimals,
+                requestedAmount: depositAmount.toString(),
+                requestedUiAmount: Number(depositAmount) / Math.pow(10, tokenBalance.value.decimals)
+            });
+            
+            if (new BN(tokenBalance.value.amount).lt(depositAmount)) {
+                updateTransactionState(config.tokenMint, { 
+                    isLoading: false, 
+                    error: `Insufficient balance. You have ${tokenBalance.value.uiAmount} tokens but trying to deposit ${Number(depositAmount) / Math.pow(10, tokenBalance.value.decimals)}` 
+                });
+                return;
+            }
+            
+            const [depositPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from("deposit"), takerPublicKey.toBuffer(), tokenMint.toBuffer()], 
+                program.programId
+            );
+            const [userPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from("user"), takerPublicKey.toBuffer(), tokenMint.toBuffer()], 
+                program.programId
+            );
+            
+            console.log('Program addresses:', {
+                depositPDA: depositPDA.toString(),
+                userPDA: userPDA.toString(),
+                vaultATA: vaultATA.toString()
+            });
 
-            // Check if user token account exists, create if not
             const userTokenAccountInfo = await connection.getAccountInfo(userTokenAccount);
             if (!userTokenAccountInfo) {
-                const ix = createAssociatedTokenAccountInstruction(
-                    takerPublicKey,
-                    userTokenAccount,
-                    takerPublicKey,
-                    tokenMint
-                );
-
+                const ix = createAssociatedTokenAccountInstruction(takerPublicKey, userTokenAccount, takerPublicKey, tokenMint);
                 const tx = new Transaction().add(ix);
                 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("finalized");
                 tx.recentBlockhash = blockhash;
                 tx.lastValidBlockHeight = lastValidBlockHeight;
                 tx.feePayer = wallet.publicKey;
-
                 const signedTx = await wallet.signTransaction(tx);
-                const sig = await connection.sendRawTransaction(signedTx.serialize());
-                await connection.confirmTransaction({
-                    blockhash,
-                    lastValidBlockHeight,
-                    signature: sig
-                });
-                console.log("Created associated token account:", sig);
+                await connection.sendRawTransaction(signedTx.serialize());
             }
 
             const transaction = await program.methods
                 .depositCollateral(depositAmount)
                 .accountsStrict({
-                    user: wallet.publicKey,
-                    tokenMint,
-                    userTokenAccount,
-                    userData: userPDA,
-                    deposit: depositPDA,
-                    config: configPublicKey,
-                    vault: vaultATA,
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    systemProgram: SystemProgram.programId,
+                    user: wallet.publicKey, tokenMint, userTokenAccount, userData: userPDA,
+                    deposit: depositPDA, config: configPublicKey, vault: vaultATA,
+                    tokenProgram: TOKEN_PROGRAM_ID, systemProgram: SystemProgram.programId,
                     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-                })
-                .transaction();
+                }).transaction();
 
             const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("finalized");
             transaction.recentBlockhash = blockhash;
@@ -186,197 +192,157 @@ export default function ConfigList() {
 
             const signedTx = await wallet.signTransaction(transaction);
             const sig = await connection.sendRawTransaction(signedTx.serialize());
-            await connection.confirmTransaction({
-                blockhash,
-                lastValidBlockHeight,
-                signature: sig
-            });
+            await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: sig });
 
-            const depositData = await program.account.deposit.fetch(depositPDA);
-            console.log("Deposited successfully:", depositData.configAccount.toBase58());
-
-            updateTransactionState(config.tokenMint, {
-                isLoading: false,
-                txSig: sig,
-                error: null
-            });
-
-            // Clear the amount input after successful deposit
-            setDepositAmounts(prev => ({
-                ...prev,
-                [config.tokenMint]: new BN(0)
-            }));
+            updateTransactionState(config.tokenMint, { isLoading: false, txSig: sig });
+            setDepositAmounts(prev => ({ ...prev, [config.tokenMint]: new BN(0) }));
 
             const hfbn = await uploadHf(takerPublicKey, tokenMint, program);
-
-            await program.methods.temp(hfbn).accountsStrict({
-                user: takerPublicKey,
-                userData: userPDA,
-                tokenMint: tokenMint
-
-            }).rpc();
-
-            try {
-                const updatedConfigs = await fetchAllConfigsOnChain(wallet);
-                setConfigs(updatedConfigs);
-            } catch (e) {
-                console.error("Failed to refresh configs:", e);
+            await program.methods.temp(hfbn).accountsStrict({ user: takerPublicKey, userData: userPDA, tokenMint }).rpc();
+            
+        } catch (err) {
+            console.error("Transaction failed:", err);
+            let errorMessage = "An unknown error occurred.";
+            if (err instanceof SendTransactionError) {
+                const logs = err.logs || [];
+                if (logs.some(log => log.includes("insufficient funds"))) {
+                    errorMessage = "Transaction failed due to insufficient funds. Please check your token balance.";
+                } else {
+                    errorMessage = "Transaction simulation failed. See console for details.";
+                }
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
             }
-
-        } catch (error) {
-            console.error("Transaction failed:", error);
-            updateTransactionState(config.tokenMint, {
-                isLoading: false,
-                error: error instanceof Error ? error.message : "Transaction failed"
-            });
+            updateTransactionState(config.tokenMint, { isLoading: false, error: errorMessage });
         }
     };
 
-    // Handle amount input change
     const handleAmountChange = (tokenMint: string, value: string) => {
         const parsedAmount = parseAmountInput(value);
         if (parsedAmount !== null) {
-            setDepositAmounts(prev => ({
-                ...prev,
-                [tokenMint]: parsedAmount
-            }));
+            setDepositAmounts(prev => ({ ...prev, [tokenMint]: parsedAmount }));
         }
-
-        // Clear any previous error for this token
         updateTransactionState(tokenMint, { error: null });
     };
 
-    // Load configs
     useEffect(() => {
+        if (!wallet) return;
         const loadConfigs = async () => {
-            if (!wallet) return;
-
             setIsLoading(true);
             setError(null);
-
             try {
-                const configs = await fetchAllConfigsOnChain(wallet);
-                console.log('Fetched configs:', configs);
-                setConfigs(configs);
+                const configsData = await fetchAllConfigsOnChain(wallet);
+                setConfigs(configsData);
             } catch (e) {
-                console.error("Failed to fetch configs:", e);
                 setError("Failed to load token configurations. Please try again.");
             } finally {
                 setIsLoading(false);
             }
         };
-
         loadConfigs();
     }, [wallet]);
 
+    const listVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    };
+
     if (!wallet) {
         return (
-            <div className="min-h-screen bg-black p-4">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-xl font-bold mb-4 text-white-900">Available Tokens</h2>
-                    <p className="text-white-600">Please connect your wallet to view available tokens.</p>
+             <div className="w-full bg-gray-950 text-white min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="mx-auto w-16 h-16 bg-gray-900 border-2 border-gray-800 rounded-full flex items-center justify-center mb-4">
+                        <Wallet className="h-8 w-8 text-gray-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2 text-white">Connect Wallet</h2>
+                    <p className="text-gray-400">Please connect your wallet to deposit collateral.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-black p-4">
-            <div className="max-w-4xl mx-auto">
-                <h2 className="text-xl font-bold mb-4 text-white-900">Available Tokens</h2>
+        <div className="w-full bg-gray-950 text-white min-h-screen">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-12">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white">Deposit Collateral</h1>
+                    <p className="text-lg text-gray-400 mt-2">Select a token and deposit funds to use as collateral.</p>
+                </motion.div>
 
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
+                    <div className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2 mb-6">
+                        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span><strong>Error:</strong> {error}</span>
                     </div>
                 )}
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-8 bg-black">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        <span className="ml-2 text-white-700">Loading tokens...</span>
-                    </div>
-                ) : configs.length === 0 ? (
-                    <div className="text-center py-8 bg-black">
-                        <p className="text-white-600">No token configurations found.</p>
+                {isLoading ? <LoadingSkeleton /> : configs.length === 0 ? (
+                    <div className="text-center py-16">
+                        <p className="text-gray-400">No token configurations found.</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <motion.div className="space-y-6" variants={listVariants} initial="hidden" animate="visible">
                         {configs.map((config) => {
                             const txState = getTransactionState(config.tokenMint);
                             const currentAmount = depositAmounts[config.tokenMint] || new BN(0);
-                            const displayAmount = currentAmount.div(new BN(Math.pow(10, DISPLAY_DECIMALS))).toString();
+                            const displayAmount = formatAmountForDisplay(currentAmount);
 
                             return (
-                                <div key={config.publicKey} className="border border-gray-200 rounded-lg p-4 bg-black shadow-sm">
-                                    <div className="mb-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h3 className="font-semibold text-lg text-white-900">Token Details</h3>
+                                <Card key={config.publicKey} className="bg-gray-900/50 border-gray-800 overflow-hidden">
+                                    <CardHeader>
+                                        <CardTitle className="text-xl text-white flex items-center gap-3">
+                                            <span className="p-2 bg-purple-600/20 border border-purple-500/30 rounded-md">
+                                                <Coins className="h-5 w-5 text-purple-400" />
+                                            </span>
+                                            <span className="break-all">{config.tokenMint}</span>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="relative">
+                                            <Input
+                                                type="number" step="any" min="0"
+                                                value={displayAmount}
+                                                placeholder="0.00"
+                                                onChange={(e) => handleAmountChange(config.tokenMint, e.target.value)}
+                                                disabled={txState.isLoading}
+                                                className="bg-gray-800 border-gray-700 h-12 text-lg"
+                                            />
                                         </div>
-                                        <p className="text-sm text-white-600 break-all mb-2">
-                                            <span className="font-medium">Token Mint:</span> {config.tokenMint}
-                                        </p>
-                                    </div>
+                                        <Button
+                                            className="w-full h-11 text-base bg-purple-600 hover:bg-purple-700 text-white"
+                                            onClick={() => handleDeposit(config)}
+                                            disabled={txState.isLoading || currentAmount.isZero()}
+                                        >
+                                            {txState.isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Deposit Collateral'}
+                                        </Button>
 
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-white-700 mb-2">
-                                            Deposit Amount
-                                        </label>
-                                        <input
-                                            type="number"
-                                            step="any"
-                                            min="0"
-                                            value={(Number(displayAmount.toString())).toString()}
-                                            placeholder="Enter amount to deposit"
-                                            onChange={(e) => handleAmountChange(config.tokenMint, e.target.value)}
-                                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                                            disabled={txState.isLoading}
-                                        />
-                                    </div>
-
-                                    {/* {txState.error && (
-                                        <div className="mb-4 text-sm text-red-600 bg-red-50 p-2 rounded">
-                                            {txState.error}
-                                        </div>
-                                    )} */}
-
-                                    <button
-                                        onClick={() => CreateDeposit(config)}
-                                        disabled={txState.isLoading || currentAmount.isZero()}
-                                        className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${txState.isLoading || currentAmount.isZero()
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                                            }`}
-                                    >
-                                        {txState.isLoading ? (
-                                            <div className="flex items-center justify-center">
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                Processing...
-                                            </div>
-                                        ) : (
-                                            'Deposit'
-                                        )}
-                                    </button>
-
-                                    {txState.txSig && (
-                                        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                                            <p className="text-sm text-green-800 font-medium mb-2">
-                                                ✅ Transaction Successful!
-                                            </p>
-                                            <a
-                                                href={`https://explorer.solana.com/tx/${txState.txSig}?cluster=devnet`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
-                                            >
-                                                View on Solana Explorer
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
+                                        <AnimatePresence>
+                                            {txState.error && (
+                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                    className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2">
+                                                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                    <span><strong>Error:</strong> {txState.error}</span>
+                                                </motion.div>
+                                            )}
+                                            {txState.txSig && (
+                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                    className="bg-green-900/30 text-green-400 text-sm p-3 border border-green-800 rounded-md flex items-start gap-2">
+                                                    <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                    <div className="flex-grow min-w-0">
+                                                        <strong>Success:</strong>
+                                                        <a href={`https://explorer.solana.com/tx/${txState.txSig}?cluster=devnet`} target="_blank" rel="noreferrer"
+                                                            className="ml-2 text-purple-400 hover:text-purple-300 underline break-all">
+                                                            View Transaction
+                                                        </a>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </CardContent>
+                                </Card>
                             );
                         })}
-                    </div>
+                    </motion.div>
                 )}
             </div>
         </div>

@@ -1,5 +1,6 @@
 {
-  "name": "Interest",
+  "name": "Credix",
+  
   "scripts": {
     "anchor": "cd anchor && anchor",
     "anchor-build": "cd anchor && anchor build",
@@ -29,6 +30,7 @@
   "type": "module",
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
+    "@lottiefiles/dotlottie-react": "^0.14.4",
     "@project-serum/anchor": "^0.26.0",
     "@pythnetwork/hermes-client": "^2.0.0",
     "@pythnetwork/pyth-solana-receiver": "^0.10.1",
@@ -49,6 +51,7 @@
     "@tanstack/react-query": "^5.80.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.11",
     "jotai": "^2.12.5",
     "lucide-react": "^0.516.0",
     "next-themes": "^0.4.6",
