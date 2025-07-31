@@ -9,7 +9,7 @@ skip-lint = false
 interest = "FqzkXZdwYjurnUKetJCAvaUw5WAqbwzU6gZEwydeEfqS"
 
 [programs.devnet]
-interest="J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY"
+interest="AM4tcZNBHBGaDeLEPgzuoEJbHbXqn2odYm9yXC93iUu"
 
 [registry]
 url = "https://api.apr.dev"

@@ -6,9 +6,10 @@ import { Badge } from '../ui/badge';
 import { Loader2, Search, Coins, BarChart, Users, Hash, ShieldCheck, AlertCircle } from 'lucide-react';
 import { decodeInstruction, getProgramName, type DecodedInstruction } from '../providers/transaction.ts';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Interest_PROGRAM_ID } from 'anchor/src/source.ts';
 
 // The program address from your transaction.ts file
-const PROGRAM_ID = "J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY";
+const PROGRAM_ID = Interest_PROGRAM_ID;
 const CLUSTER_URL = "https://api.devnet.solana.com";
 
 // --- Interfaces ---
@@ -130,7 +131,7 @@ const SolanaTransactionAnalyzer: React.FC = () => {
         try {
             const pubKey = new PublicKey(programId);
             const signatureInfos = await connection.getSignaturesForAddress(pubKey, { limit: 25 });
-            
+
             if (signatureInfos.length > 0) {
                 const newTransactions = await processSignatures(signatureInfos);
                 setTransactions(newTransactions);
@@ -147,10 +148,10 @@ const SolanaTransactionAnalyzer: React.FC = () => {
             setLoading(false);
         }
     };
-    
+
     const handleLoadMore = async () => {
         if (!lastSignature || loadingMore) return;
-        
+
         setLoadingMore(true);
         try {
             const pubKey = new PublicKey(programId);
@@ -167,7 +168,7 @@ const SolanaTransactionAnalyzer: React.FC = () => {
                 setCanLoadMore(false);
             }
         } catch (err) {
-             setError(err instanceof Error ? err.message : 'Failed to fetch more transactions');
+            setError(err instanceof Error ? err.message : 'Failed to fetch more transactions');
         } finally {
             setLoadingMore(false);
         }
@@ -288,7 +289,7 @@ const AnalysisList = ({ title, data }: { title: string; data: Record<string, num
 const AnalysisChart = ({ title, data }: { title: string; data: Record<string, number> }) => {
     const sortedData = Object.entries(data).sort(([, a], [, b]) => b - a).slice(0, 5);
     const maxValue = Math.max(...sortedData.map(([, count]) => count), 0);
-    
+
     return (
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
             <h3 className="font-semibold mb-4 text-white">{title}</h3>
@@ -301,7 +302,7 @@ const AnalysisChart = ({ title, data }: { title: string; data: Record<string, nu
                                 className="bg-purple-600 h-6 rounded-full flex items-center justify-end pr-2"
                                 style={{ width: `${maxValue > 0 ? (count / maxValue) * 100 : 0}%` }}
                             >
-                               <span className="text-white text-xs font-medium">{count}</span>
+                                <span className="text-white text-xs font-medium">{count}</span>
                             </div>
                         </div>
                     </div>
@@ -311,7 +312,7 @@ const AnalysisChart = ({ title, data }: { title: string; data: Record<string, nu
     );
 };
 
-const TransactionCard = ({ tx } : { tx: TransactionSummary }) => (
+const TransactionCard = ({ tx }: { tx: TransactionSummary }) => (
     <Card className="bg-gray-900/50 border-gray-800">
         <CardHeader>
             <div className="flex justify-between items-start gap-4">
