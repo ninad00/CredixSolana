@@ -1,24 +1,25 @@
-import { AppProviders } from '@/components/app-providers.tsx';
-import { AppLayout } from '@/components/app-layout.tsx';
-import { RouteObject, useRoutes } from 'react-router';
-import { lazy, Suspense, useMemo } from 'react';
-import { ConnectionProvider } from '@solana/wallet-adapter-react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { clusterApiUrl } from '@solana/web3.js';
-import './index.css';
+import { AppProviders } from '@/components/app-providers.tsx'
+import { AppLayout } from '@/components/app-layout.tsx'
+import { RouteObject, useRoutes } from 'react-router'
+import { lazy, Suspense, useMemo } from 'react'
+import { ConnectionProvider } from '@solana/wallet-adapter-react'
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
+import { clusterApiUrl } from '@solana/web3.js'
+import './index.css'
+import { FullPageLoading } from './components/FullPageLoading'
+import { LoadingSpinner } from './components/LoadingSpinner'
 
-
-const LazyAccountIndex = lazy(() => import('./Index'));
+const LazyAccountIndex = lazy(() => import('./Index'))
 // const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'));
 // const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'));
-const LazyInterest = lazy(() => import('@/components/interest/interest-feature'));
-const LazyDeposit = lazy(() => import('@/components/interest/depositToken'));
-const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw'));
-const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'));
-const LazyclaimLiquidity = lazy(() => import('@/components/interest/withdrawLiq'));
-const LazyLiquidate = lazy(() => import('@/components/interest/liquidate'));
-const LazyHistory = lazy(() => import('@/components/interest/transaction'));
-const NotFound = lazy(() => import('./components/Not-Found'));
+const LazyInterest = lazy(() => import('@/components/interest/interest-feature'))
+const LazyDeposit = lazy(() => import('@/components/interest/depositToken'))
+const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw'))
+const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'))
+const LazyclaimLiquidity = lazy(() => import('@/components/interest/withdrawLiq'))
+const LazyLiquidate = lazy(() => import('@/components/interest/liquidate'))
+const LazyHistory = lazy(() => import('@/components/interest/transaction'))
+const NotFound = lazy(() => import('./components/Not-Found'))
 
 const links = [
   { label: 'Home', path: '/' },
@@ -29,12 +30,16 @@ const links = [
   { label: 'Claim Liquidity', path: '/claimliquidity' },
   { label: 'Liquidate', path: '/liquidate' },
   { label: 'History', path: '/history' },
-];
+]
 
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyAccountIndex /></Suspense>,
+    element: (
+      <Suspense fallback={<FullPageLoading />}>
+        <LazyAccountIndex />
+      </Suspense>
+    ),
     index: true,
   },
   // {
@@ -52,58 +57,86 @@ const routes: RouteObject[] = [
   // },
   {
     path: 'interest',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyInterest /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyInterest />
+      </Suspense>
+    ),
   },
   {
     path: 'deposit',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyDeposit /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyDeposit />
+      </Suspense>
+    ),
   },
   {
     path: 'depositList',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyDepositList /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyDepositList />
+      </Suspense>
+    ),
   },
   {
     path: 'liquidity',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyLiquidity /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyLiquidity />
+      </Suspense>
+    ),
   },
   {
     path: 'claimliquidity',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyclaimLiquidity /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyclaimLiquidity />
+      </Suspense>
+    ),
   },
   {
     path: 'liquidate',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyLiquidate /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyLiquidate />
+      </Suspense>
+    ),
   },
   {
     path: 'history',
-    element: <Suspense fallback={<div>Loading...</div>}><LazyHistory /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LazyHistory />
+      </Suspense>
+    ),
   },
   {
     path: '*',
-    element: <Suspense fallback={<div>Loading...</div>}><NotFound /></Suspense>,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <NotFound />
+      </Suspense>
+    ),
   },
-];
-
+]
 
 export function App() {
-  const router = useRoutes(routes);
+  const router = useRoutes(routes)
 
   // Solana wallet setup
-  const network = WalletAdapterNetwork.Devnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-
+  const network = WalletAdapterNetwork.Devnet
+  const endpoint = useMemo(() => clusterApiUrl(network), [network])
 
   return (
-    <ConnectionProvider endpoint={endpoint} >
+    <ConnectionProvider endpoint={endpoint}>
       {/* <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider> */}
       <AppProviders>
-        <AppLayout links={links}>
-          {router}
-        </AppLayout>
+        <AppLayout links={links}>{router}</AppLayout>
       </AppProviders>
       {/* </WalletModalProvider> */}
       {/* </WalletProvider> */}
     </ConnectionProvider>
-  );
+  )
 }

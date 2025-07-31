@@ -32,7 +32,7 @@ interface User {
     publicKey: string;
     user: string;
     borrowedAmount: string;
-    primaryToken: string;
+    primaryToken: string;x
     hf: string;
     tokenBalance: string;
     bump: number;

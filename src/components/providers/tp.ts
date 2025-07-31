@@ -67,6 +67,7 @@ export async function runAllPrices(): Promise<Record<string, string>> {
     const prices: Record<string, string> = {};
 
     const allMints = [...Object.keys(mintToPriceFeedMap), ...Object.keys(HARDCODED_MINTS)];
+    console.log(DSC_MINT);
 
     for (const mint of allMints) {
         try {

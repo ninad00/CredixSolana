@@ -4,7 +4,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { fetchAlldeposits, fetchAllUsersOnChain } from "./fetchallaccounts.tsx";
 import { DSC_MINT, getProgram } from "../../../anchor/src/source.ts";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { createMemoInstruction } from "@solana/spl-memo";
+// import { createMemoInstruction } from "@solana/spl-memo";
 import BN from "bn.js";
 import {
     getAssociatedTokenAddress,
@@ -16,10 +16,10 @@ import { AnchorProvider } from "@coral-xyz/anchor";
 import { getPriceForMint } from "../providers/tp.ts";
 import { uploadHf } from "./hf.tsx";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Assuming you have a styled Input component
-import { Wallet, PiggyBank, ArrowUp, ArrowDown, RefreshCw, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Wallet, PiggyBank, RefreshCw, CheckCircle } from 'lucide-react';
 
 // --- Interfaces (unchanged) ---
 interface Deposit {
@@ -61,7 +61,15 @@ const parseAmountInput = (val: string): BN => {
     return new BN(Math.floor(parsed * 1e6));
 };
 
-const formatTokenMint = (tokenMint: string) => `${tokenMint.slice(0, 4)}...${tokenMint.slice(-4)}`;
+const tokenNames: Record<string, string> = {
+    "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr": "EURC",
+    "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": "USDC",
+};
+
+const formatTokenMint = (tokenMint: string) => {
+    const name = tokenNames[tokenMint];
+    return name ? `${name} (${tokenMint.slice(0, 4)}...${tokenMint.slice(-4)})` : `${tokenMint.slice(0, 4)}...${tokenMint.slice(-4)}`;
+}
 
 // --- UI Components ---
 const LoadingSkeleton = () => (
@@ -487,12 +495,31 @@ export default function DepositList() {
                                                     {state.isProcessing && state.processingAction === 'withdraw' ? 'Withdrawing...' : 'Withdraw'}
                                                 </Button>
                                             </div>
+                                            {/* Get HF Action */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-12 bg-blue-600 hover:bg-blue-700 text-white"
+                                                    onClick={() => getHf(deposit, uniqueKey)}
+                                                    disabled={!wallet?.publicKey || state.isProcessing}
+                                                >
+                                                    {state.isProcessing && state.processingAction === 'hf' ? 'Refreshing...' : 'Get HF'}
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    className="h-12 bg-purple-600 hover:bg-purple-700 text-white"
+                                                    onClick={() => getHf(deposit, uniqueKey)}
+                                                    disabled={!wallet?.publicKey || state.isProcessing}
+                                                >
+                                                    {state.isProcessing && state.processingAction === 'hf' ? 'Refreshing...' : 'Refresh All'}
+                                                </Button>
+                                            </div>
                                         </div>
                                     </CardContent>
 
                                     {/* Status Messages */}
                                     <AnimatePresence>
-                                        {state.error && (
+                                        {/* {state.error && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
@@ -502,7 +529,7 @@ export default function DepositList() {
                                                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                                                 <span><strong>Error:</strong> {state.error}</span>
                                             </motion.div>
-                                        )}
+                                        )} */}
                                         {state.txSig && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
