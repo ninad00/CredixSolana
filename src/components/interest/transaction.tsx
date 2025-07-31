@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Interest_PROGRAM_ID } from 'anchor/src/source.ts';
 
 // The program address from your transaction.ts file
-const PROGRAM_ID = Interest_PROGRAM_ID;
+const PROGRAM_ID = Interest_PROGRAM_ID.toBase58();
 const CLUSTER_URL = "https://api.devnet.solana.com";
 
 // --- Interfaces ---
