@@ -1,6 +1,6 @@
 {
   "name": "Credix",
-  "homepage": "Credix",
+  "homepage": "https://ninad00.github.io/CredixSolana/",
   "scripts": {
     "anchor": "cd anchor && anchor",
     "anchor-build": "cd anchor && anchor build",
