@@ -21,7 +21,6 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
 
   return (
     <>
-      {/* Header element with modern styling. Removed the bottom border for a cleaner look. */}
       <header className="sticky top-0 z-50 w-full backdrop-blur-lg mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -30,7 +29,8 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
               <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white hover:opacity-80 hover:scale-105 transition-all">
                 CREDIX
               </Link>
-              <nav className="hidden md:flex items-center space-x-1 rounded-full p-1">
+              {/* Changed md:flex to lg:flex */}
+              <nav className="hidden lg:flex items-center space-x-1 rounded-full p-1">
                 {links.map(({ label, path }) => (
                   <Link
                     key={path}
@@ -55,14 +55,15 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
             </div>
 
             {/* Desktop Action Buttons */}
-            <div className="hidden md:flex items-center space-x-2">
+            {/* Changed md:flex to lg:flex */}
+            <div className="hidden lg:flex items-center space-x-2">
               <WalletButton />
               <ClusterUiSelect />
-             
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            {/* Changed md:hidden to lg:hidden */}
+            <div className="lg:hidden">
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
                 <Menu className="h-6 w-6" />
               </Button>
@@ -80,28 +81,6 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
     </>
   );
 }
-
-// // Custom NavLink with an animated pill background for the active state
-// const NavLink = ({ path, label, isActive }: { path:string; label: string; isActive: boolean }) => {
-//   return (
-//     <Link
-//       to={path}
-//       className="relative px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-300 transition-colors hover:text-black dark:hover:text-white"
-//     >
-//       {/* The animated pill background for the active link */}
-//       {isActive && (
-//         <motion.div
-//           className="absolute inset-0 bg-white dark:bg-neutral-800 rounded-full shadow-sm"
-//           layoutId="active-pill" // This ID links the animation across different links
-//           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-//         />
-//       )}
-//       {/* The label text needs to be relative to sit on top of the pill */}
-//       <span className="relative z-10">{label}</span>
-//     </Link>
-//   );
-// };
-
 
 // Mobile Menu Component with slide-in and stagger animations
 const MobileMenu = ({ links, isActive, onClose }: { links: { label: string; path: string }[]; isActive: (path: string) => boolean; onClose: () => void; }) => {
@@ -122,8 +101,9 @@ const MobileMenu = ({ links, isActive, onClose }: { links: { label: string; path
   };
 
   return (
+    // Changed md:hidden to lg:hidden to match the trigger button
     <motion.div
-      className="fixed inset-0 z-50 md:hidden"
+      className="fixed inset-0 z-50 lg:hidden"
       initial="hidden"
       animate="visible"
       exit="exit"

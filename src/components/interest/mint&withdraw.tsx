@@ -426,13 +426,7 @@ export default function DepositList() {
                                                 </span>
                                                 {`Position: ${formatTokenMint(deposit.tokenMint)}`}
                                             </CardTitle>
-                                            <Button
-                                                variant="ghost" size="icon"
-                                                onClick={() => getHf(deposit, uniqueKey)}
-                                                disabled={!wallet?.publicKey || state.isProcessing}
-                                            >
-                                                <RefreshCw className={`h-4 w-4 text-gray-400 ${state.isProcessing && state.processingAction === 'hf' ? 'animate-spin' : ''}`} />
-                                            </Button>
+                                            
                                         </div>
                                     </CardHeader>
                                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -479,24 +473,24 @@ export default function DepositList() {
                                             {/* Withdraw Action */}
                                             <div className="relative">
                                                 <Input
-                                                    type="number" step="any" min="0"
+                                                    type="number" step="any" 
                                                     value={(Number(state.withdrawAmount.toString()) / 1e6).toString()}
                                                     onChange={(e) => updateDepositState(uniqueKey, { withdrawAmount: parseAmountInput(e.target.value) })}
                                                     placeholder="0.00"
                                                     disabled={state.isProcessing}
                                                     className="bg-gray-800 border-gray-700 h-12 text-lg pr-32"
                                                 />
-                                                <Button
+                                                <Button 
                                                     variant="destructive"
                                                     className="absolute top-1.5 right-1.5 h-9 bg-red-600 hover:bg-red-700"
                                                     onClick={() => withdrawCollateral(deposit, uniqueKey)}
-                                                    disabled={!wallet?.publicKey || state.isProcessing || state.withdrawAmount.eq(new BN(0))}
+                                                    disabled={!wallet?.publicKey || state.isProcessing}
                                                 >
                                                     {state.isProcessing && state.processingAction === 'withdraw' ? 'Withdrawing...' : 'Withdraw'}
                                                 </Button>
                                             </div>
                                             {/* Get HF Action */}
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid gap-3">
                                                 <Button
                                                     variant="outline"
                                                     className="h-12 bg-blue-600 hover:bg-blue-700 text-white"
@@ -505,14 +499,7 @@ export default function DepositList() {
                                                 >
                                                     {state.isProcessing && state.processingAction === 'hf' ? 'Refreshing...' : 'Get HF'}
                                                 </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-12 bg-purple-600 hover:bg-purple-700 text-white"
-                                                    onClick={() => getHf(deposit, uniqueKey)}
-                                                    disabled={!wallet?.publicKey || state.isProcessing}
-                                                >
-                                                    {state.isProcessing && state.processingAction === 'hf' ? 'Refreshing...' : 'Refresh All'}
-                                                </Button>
+                                               
                                             </div>
                                         </div>
                                     </CardContent>

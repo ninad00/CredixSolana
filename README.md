@@ -1,86 +1,179 @@
-# Interest-counter
+# CredixSolana Codebase Analysis Report
 
-This is a Vite app containing:
+A comprehensive analysis of the CredixSolana decentralized finance protocol.
 
-- Tailwind CSS setup for styling
-- Useful wallet UI elements setup using [@solana/web3.js](https://www.npmjs.com/package/@solana/web3.js)
-- A basic Greeter Solana program written in Anchor
-- UI components for interacting with the Greeter program using the Anchor generated client
+---
 
-## Getting Started
+## 1. Project Overview
 
-### Installation
+CredixSolana is a decentralized finance (DeFi) protocol built on the Solana blockchain using the Anchor framework. It appears to be a lending/borrowing platform with features for collateralized debt positions, liquidity provision, and automated liquidations.
 
-#### Download the template
+---
 
-```shell
-pnpm create solana-dapp@latest -t gh:solana-developers/solana-templates/legacy/Interest-counter
-```
+## 2. System Architecture
 
-#### Install Dependencies
+### 2.1. Frontend (React + TypeScript)
 
-```shell
-pnpm install
-```
+-   **Framework**: `React 19` with `TypeScript`
+-   **Build Tool**: `Vite`
+-   **UI Components**:
+    -   Radix UI primitives for accessible components
+    -   Tailwind CSS for styling
+    -   Framer Motion for animations
+    -   Lucide icons
 
-## Apps
+### 2.2. Blockchain Integration
 
-### anchor
+-   **Wallet Integration**:
+    -   `@solana/wallet-adapter` for wallet connections
+    -   Support for various Solana wallets
+-   **Smart Contracts**:
+    -   Built with Anchor (`Rust`)
+    -   **Program ID**: `J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY` (devnet)
 
-This is a Solana program written in Rust using the Anchor framework.
+### 2.3. Backend Services
 
-#### Commands
+-   Solana RPC nodes for blockchain interaction
+-   Price feeds integration (potentially Pyth Network based on imports)
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `pnpm`, eg: `pnpm anchor`.
+---
 
-#### Sync the program id:
+## 3. Directory Structure
 
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
+### 3.1. Root Directory
 
-You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
+-   `/anchor` - Smart contract code and configurations
+-   `/public` - Static assets
+-   `/src` - Frontend source code
+    -   `/components` - React components
+    -   `/config` - Configuration files
+    -   `/lib` - Utility functions
+    -   `/utils` - Helper functions
 
-```shell
-pnpm anchor keys sync
-```
+---
 
-#### Build the program:
+## 4. Key Components
 
-```shell
-pnpm anchor-build
-```
+### 4.1. Smart Contracts (Anchor Program)
 
-#### Start the test validator with the program deployed:
+-   **Main Program**: Implements core lending protocol logic.
+-   **Key Modules**:
+    -   `deposit`: Handle collateral deposits
+    -   `withdraw`: Handle collateral withdrawals
+    -   `engine`: Core protocol logic
+    -   `lp`: Liquidity provider functionality
+    -   `pricefeeds`: Oracle price feed integration
 
-```shell
-pnpm anchor-localnet
-```
+### 4.2. Frontend Components
 
-#### Run the tests
+-   **Interest Management**:
+    -   `interest-feature.tsx`: Main dashboard for interest program
+    -   `depositToken.tsx`: Deposit collateral interface
+    -   `mint&withdraw.tsx`: Mint and withdraw DSC tokens
+    -   `giveLiquidity.tsx`: Provide liquidity to the protocol
+    -   `liquidate.tsx`: Liquidate undercollateralized positions
 
-```shell
-pnpm anchor-test
-```
+---
 
-#### Deploy to Devnet
+## 5. Core Features
 
-```shell
-pnpm anchor deploy --provider.cluster devnet
-```
+### 5.1. Collateral Management
 
-### web
+-   Users can deposit supported tokens as collateral.
+-   Collateral is used to back minted **DSC** (Decentralized Stable Coin).
+-   Health factor monitoring for positions.
 
-This is a React app that uses the Anchor generated client to interact with the Solana program.
+### 5.2. Lending/Borrowing
 
-#### Commands
+-   Mint **DSC** against deposited collateral.
+-   Interest rate calculations.
+-   Loan-to-value ratio enforcement.
 
-Start the web app
+### 5.3. Liquidity Provision
 
-```shell
-pnpm dev
-```
+-   Users can provide liquidity to the protocol.
+-   Earn fees from protocol operations.
+-   Withdraw liquidity with accrued rewards.
 
-Build the web app
+### 5.4. Liquidations
 
-```shell
-pnpm build
-```
+-   Automated liquidation of undercollateralized positions.
+-   Liquidation bonus for liquidators.
+-   Health factor monitoring.
+
+---
+
+## 6. Technical Stack
+
+### 6.1. Frontend
+
+-   **UI Framework**: `React 19`
+-   **State Management**: `Jotai`
+-   **Styling**: `Tailwind CSS`
+-   **Form Handling**: `React Hook Form`
+-   **Data Fetching**: `@tanstack/react-query`
+-   **Wallet Integration**: `@solana/wallet-adapter`
+
+### 6.2. Smart Contracts
+
+-   **Language**: `Rust`
+-   **Framework**: `Anchor`
+-   **Key Dependencies**:
+    -   `anchor-lang`: Core Anchor framework
+    -   `spl-token`: Token program interactions
+    -   `spl-associated-token-account`: Associated token accounts
+
+---
+
+## 7. Important Terminology
+
+-   **DSC**: Decentralized Stable Coin, the stablecoin minted by the protocol.
+-   **Health Factor**: A metric determining the safety of a position.
+-   **LTV (Loan-to-Value)**: The ratio of the borrowed amount to the collateral value.
+-   **Liquidation Threshold**: The LTV at which a position becomes eligible for liquidation.
+-   **Liquidation Bonus**: An incentive given to liquidators.
+
+---
+
+## 8. Deployment
+
+### 8.1. Development
+
+-   Local development using Anchor's local validator.
+-   Testnet deployment on Solana devnet.
+
+### 8.2. Production
+
+-   Mainnet deployment configuration is available.
+-   Program upgrades are handled through Anchor's program deployment flow.
+
+---
+
+## 9. Security Considerations
+
+-   Role-based access control in smart contracts.
+-   Price oracle integration for accurate collateral valuation.
+-   Slippage protection for transactions.
+-   Comprehensive error handling and validation.
+
+---
+
+## 10. Development Setup
+
+### 10.1. Prerequisites
+
+-   Node.js (v18+)
+-   Rust (latest stable)
+-   Solana CLI
+-   Anchor CLI
+
+### 10.2. Installation
+
+```bash
+# Install dependencies
+npm install
+
+npm run dev
+
+## 11. Testing
+

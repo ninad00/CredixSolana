@@ -9,25 +9,22 @@ import { siteConfig, socialLinks } from "../config/site";
 const AppFooter: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  // 1. Hooks for the reveal-on-scroll animation
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 }); // Trigger animation once when 30% is visible
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
   const mainControls = useAnimation();
 
-  // 2. Start animation when the component is in view
   useEffect(() => {
     if (isInView) {
       mainControls.start("visible");
     }
   }, [isInView, mainControls]);
 
-  // 3. Animation variants for the container and its children
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2, // Each child will animate 0.2s after the previous one
+        staggerChildren: 0.2, 
       },
     },
   };
@@ -56,10 +53,10 @@ const AppFooter: React.FC = () => {
 
 
   return (
-    <footer ref={ref} className="bg-black text-white font-sans pt-20">
+    <footer ref={ref} className="text-white font-sans pt-20">
       <div
         className="
-          relative max-w-7xl mx-auto rounded-t-3xl bg-indigo-600/90 p-8 md:p-16
+          relative max-w-7xl mx-auto rounded-t-3xl bg-purple-700 p-8 md:p-16
           before:absolute before:inset-0 before:content-[''] 
           before:bg-[url('/noise_texture_2.png')] before:opacity-45 before:z-0
           before:rounded-t-3xl

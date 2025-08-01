@@ -17,10 +17,10 @@ import {
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Text3D from './components/Text3D.tsx'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { useNavigate } from 'react-router'
 
 const STABLECOIN_MINT = DSC_MINT
 
-// A reusable animated card component for consistent animations
 const AnimatedCard = ({
   children,
   className,
@@ -58,7 +58,7 @@ const AnimatedCard = ({
   )
 }
 
-// The main landing page component
+
 const Index = () => {
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({
@@ -68,9 +68,10 @@ const Index = () => {
 
   // Parallax transformations
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
-  const heroLottieY = useTransform(scrollYProgress, [0, 1], ['0%', '35%'])
-  const heroBgY = useTransform(scrollYProgress, [0, 1], ['0%', '15%'])
+  const heroLottieY = useTransform(scrollYProgress, [0, 1], ['0%', '55%'])
+  const heroBgY = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
   const heroBgOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
+  const navigate = useNavigate()
 
   return (
     <div className="w-full bg-gray-950 text-white overflow-x-hidden">
@@ -79,7 +80,7 @@ const Index = () => {
         ref={heroRef}
         className="relative w-full h-screen flex items-center justify-center overflow-hidden"
       >
-        <motion.div style={{ y: heroBgY, opacity: heroBgOpacity }} className="absolute inset-0 bg-purple-900/10" />
+        <motion.div style={{ y: heroBgY, opacity: heroBgOpacity }} className="absolute inset-0 bg-purple-900/70 rounded-3xl" />
         <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="grid md:grid-cols-2 gap-8 items-center">
                 {/* Left Column: Text Content */}
@@ -102,7 +103,7 @@ const Index = () => {
                             </h1>
                         </Text3D>
                         
-                        <p className="text-lg text-gray-400 max-w-xl mx-auto md:mx-0 mt-8 mb-10">
+                        <p className="text-lg text-gray-400 max-w-xl mx-auto md:mx-0 mt-8 mb-10 ">
                             A secure and transparent DeFi protocol for efficient lending and borrowing. Mint DSC stablecoin or provide
                             liquidity to earn yield.
                         </p>
@@ -146,7 +147,7 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button size="lg" className="w-full mt-4 bg-purple-600 text-white hover:bg-purple-700 font-semibold">
+              <Button onClick={() => {navigate('/deposit')}} size="lg" className="w-full mt-4 bg-purple-600 text-white hover:bg-purple-700 font-semibold">
                 Start Borrowing
               </Button>
             </CardContent>
@@ -166,7 +167,7 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button size="lg" className="w-full mt-4 bg-green-600 text-white hover:bg-green-700 font-semibold">
+              <Button onClick={() => {navigate('/liquidity')}} size="lg" className="w-full mt-4 bg-green-600 text-white hover:bg-green-700 font-semibold">
                 Start Earning
               </Button>
             </CardContent>

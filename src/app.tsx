@@ -12,7 +12,7 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 const LazyAccountIndex = lazy(() => import('./Index'))
 // const LazyAccountDetail = lazy(() => import('@/components/account/account-detail-feature'));
 // const LazyDashboard = lazy(() => import('@/components/dashboard/dashboard-feature'));
-const LazyInterest = lazy(() => import('@/components/interest/interest-feature'))
+// const LazyInterest = lazy(() => import('@/components/interest/interest-feature'))
 const LazyDeposit = lazy(() => import('@/components/interest/depositToken'))
 const LazyDepositList = lazy(() => import('@/components/interest/mint&withdraw'))
 const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'))
@@ -23,7 +23,7 @@ const NotFound = lazy(() => import('./components/Not-Found'))
 
 const links = [
   { label: 'Home', path: '/' },
-  { label: 'Interest Program', path: '/interest' },
+  // { label: 'Interest Program', path: '/interest' },
   { label: 'Deposit Token', path: '/deposit' },
   { label: 'Your Deposits', path: '/depositList' },
   { label: 'Provide Liquidity', path: '/liquidity' },
@@ -55,14 +55,14 @@ const routes: RouteObject[] = [
   //     },
   //   ],
   // },
-  {
-    path: 'interest',
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <LazyInterest />
-      </Suspense>
-    ),
-  },
+  // {
+  //   path: 'interest',
+  //   element: (
+  //     <Suspense fallback={<LoadingSpinner />}>
+  //       <LazyInterest />
+  //     </Suspense>
+  //   ),
+  // },
   {
     path: 'deposit',
     element: (
