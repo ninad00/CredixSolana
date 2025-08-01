@@ -1,0 +1,1 @@
+import{K as t,j as a}from"./index-nTJrk6Cr.js";function r(){const{publicKey:n,signTransaction:s,signAllTransactions:e}=t();return a.useMemo(()=>n&&s&&e?{publicKey:n,signTransaction:s,signAllTransactions:e}:void 0,[n,s,e])}export{r as u};
