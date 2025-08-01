@@ -2,6 +2,19 @@
 
 A comprehensive analysis of the CredixSolana decentralized finance protocol.
 
+### Demo Video
+
+https://drive.google.com/file/d/1nH1-U5taYSPiEYxgRFSXEEZxL0RNyEuA/view?usp=sharing
+
+### Deployed Link
+
+https://ninad00.github.io/CredixSolana/
+
+### Screeshots
+
+![image](public/ss1.png)
+![image](public/ss2.png)
+
 ---
 
 ## 1. Project Overview

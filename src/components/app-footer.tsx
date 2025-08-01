@@ -57,9 +57,7 @@ const AppFooter: React.FC = () => {
       <div
         className="
           relative max-w-7xl mx-auto rounded-t-3xl bg-purple-700 p-8 md:p-16
-          before:absolute before:inset-0 before:content-[''] 
-          before:bg-[url('/noise_texture_2.png')] before:opacity-45 before:z-0
-          before:rounded-t-3xl
+           
         "
       >
         <motion.div
