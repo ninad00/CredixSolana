@@ -499,16 +499,16 @@ export default function DepositCollateral() {
                       </div>
                     )}
 
-                    <div className="mt-4">
+                    {/* <div className="mt-4">
                       {transactionStates[config.tokenMint]?.error && (
                         <div className="mb-4">
                           <ErrorMessage
                             message={transactionStates[config.tokenMint].error!}
                             onDismiss={() => dismissTransactionError(config.tokenMint)}
                           />
-                        </div>
-                      )}
-                    </div>
+                        </div> */}
+                    {/* )}
+                    </div> */}
                   </CardContent>
                 </Card>
               )
