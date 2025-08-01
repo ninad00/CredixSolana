@@ -118,10 +118,10 @@ export default function DepositCollateral() {
   const [depositAmounts, setDepositAmounts] = useState<DepositAmounts>({})
   const [transactionStates, setTransactionStates] = useState<TransactionStates>({})
   const [error, setError] = useState<string | null>(null)
-  
+
   // Dismiss global error
   const dismissError = useCallback(() => setError(null), [])
-  
+
   // Dismiss transaction-specific error
   const dismissTransactionError = useCallback((tokenMint: string) => {
     setTransactionStates(prev => ({
@@ -281,18 +281,18 @@ export default function DepositCollateral() {
       mint: c.tokenMint,
       name: tokenMetadataMap[c.tokenMint]?.name || 'Not loaded'
     })));
-    
+
     const loadTokenMetadata = async () => {
       const metadataMap: Record<string, TokenMetadata> = {};
       const tokensToFetch = configs.filter(config => !tokenMetadataMap[config.tokenMint]);
-      
-      console.log(`Fetching metadata for ${tokensToFetch.length} tokens:`, 
+
+      console.log(`Fetching metadata for ${tokensToFetch.length} tokens:`,
         tokensToFetch.map(t => t.tokenMint.slice(0, 4) + '...' + t.tokenMint.slice(-4))
       );
-      
+
       try {
         const results = await Promise.allSettled(
-          tokensToFetch.map(config => 
+          tokensToFetch.map(config =>
             fetchTokenMetadata(config.tokenMint)
               .then(metadata => ({ tokenMint: config.tokenMint, metadata }))
           )
@@ -333,7 +333,7 @@ export default function DepositCollateral() {
       try {
         const configsData = await fetchAllConfigsOnChain(wallet)
         setConfigs(configsData)
-        
+
         // Fetch prices for all unique token mints
         const uniqueTokenMints = [...new Set(configsData.map(c => c.tokenMint))]
         const priceMap: Record<string, number> = {}
@@ -402,7 +402,7 @@ export default function DepositCollateral() {
           )}
         </div>
       </div>
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -414,11 +414,11 @@ export default function DepositCollateral() {
           <p className="text-lg text-gray-400 mt-2">Select a token and deposit funds to use as collateral.</p>
         </motion.div>
 
-        {error && (
+        {/* {error && (
           <div className="mb-6">
             <ErrorMessage message={error} onDismiss={dismissError} />
           </div>
-        )}
+        )} */}
 
         {isLoading ? (
           <LoadingSkeleton />
@@ -438,8 +438,8 @@ export default function DepositCollateral() {
                   <CardHeader>
                     <CardTitle className="text-xl text-white flex items-center gap-3">
                       <div className="relative" style={{ width: 36, height: 36 }}>
-                        <TokenIcon 
-                          mintAddress={config.tokenMint} 
+                        <TokenIcon
+                          mintAddress={config.tokenMint}
                           size={36}
                           className="border border-purple-500/30"
                         />
@@ -498,13 +498,13 @@ export default function DepositCollateral() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="mt-4">
                       {transactionStates[config.tokenMint]?.error && (
                         <div className="mb-4">
-                          <ErrorMessage 
-                            message={transactionStates[config.tokenMint].error!} 
-                            onDismiss={() => dismissTransactionError(config.tokenMint)} 
+                          <ErrorMessage
+                            message={transactionStates[config.tokenMint].error!}
+                            onDismiss={() => dismissTransactionError(config.tokenMint)}
                           />
                         </div>
                       )}

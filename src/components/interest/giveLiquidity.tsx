@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {  AlertCircle, CheckCircle, DatabaseZap, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle, DatabaseZap, Loader2 } from 'lucide-react'
 
 // --- Interfaces ---
 
@@ -319,7 +319,7 @@ export default function ConfigList() {
 
   return (
     <div className="w-full bg-gray-950 text-white min-h-screen">
-        {/* Debug overlay - remove in production */}
+      {/* Debug overlay - remove in production */}
       <div className="fixed bottom-4 right-4 bg-black/80 p-3 rounded-lg text-xs z-50 max-w-xs">
         <div className="font-mono">
           <div>Tokens: {configs.length}</div>
@@ -333,7 +333,7 @@ export default function ConfigList() {
           )}
         </div>
       </div>
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -345,14 +345,14 @@ export default function ConfigList() {
           <p className="text-lg text-gray-400 mt-2">Provide liquidity to earn yield from protocol fees.</p>
         </motion.div>
 
-        {error && (
+        {/* {error && (
           <div className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2 mb-6">
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>
               <strong>Error:</strong> {error}
             </span>
           </div>
-        )}
+        )} */}
 
         {isLoading ? (
           <LoadingSkeleton />

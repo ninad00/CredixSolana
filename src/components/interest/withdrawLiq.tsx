@@ -240,15 +240,15 @@ export default function RedeemLiquidityList() {
                                     <CardContent className="space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-900 border border-gray-800 rounded-lg p-4">
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-sm text-gray-400 flex items-center gap-2"><PiggyBank className="h-4 w-4"/>My Deposit</span>
+                                                <span className="text-sm text-gray-400 flex items-center gap-2"><PiggyBank className="h-4 w-4" />My Deposit</span>
                                                 <span className="font-mono text-lg text-white">{formatTokenAmount(userData.tokenAmt)}</span>
                                             </div>
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-sm text-gray-400 flex items-center gap-2"><PieChart className="h-4 w-4"/>Pool Share</span>
+                                                <span className="text-sm text-gray-400 flex items-center gap-2"><PieChart className="h-4 w-4" />Pool Share</span>
                                                 <span className="font-mono text-lg text-white">{(myShare * 100).toFixed(4)}%</span>
                                             </div>
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-sm text-gray-400 flex items-center gap-2"><TrendingUp className="h-4 w-4"/>My Earnings</span>
+                                                <span className="text-sm text-gray-400 flex items-center gap-2"><TrendingUp className="h-4 w-4" />My Earnings</span>
                                                 <span className="font-mono text-lg text-green-400">{formatTokenAmount(myEarnings)}</span>
                                             </div>
                                         </div>
@@ -266,13 +266,13 @@ export default function RedeemLiquidityList() {
                                         </Button>
 
                                         <AnimatePresence>
-                                            {state.error && (
+                                            {/* {state.error && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                                     className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2">
                                                     <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                                                     <span><strong>Error:</strong> {state.error}</span>
                                                 </motion.div>
-                                            )}
+                                            )} */}
                                             {state.txSig && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                                     className="bg-green-900/30 text-green-400 text-sm p-3 border border-green-800 rounded-md flex items-start gap-2">

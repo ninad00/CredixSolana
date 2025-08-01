@@ -107,7 +107,7 @@ export default function CreateToken() {
             setTxSig(sig);
         } catch (error) {
             console.error("Transaction failed:", error);
-            alert(error instanceof Error ? error.message : "Unknown error");
+            // alert(error instanceof Error ? error.message : "Unknown error");
         } finally {
             setIsLoading(false);
         }
