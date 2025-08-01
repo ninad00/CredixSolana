@@ -18,7 +18,7 @@ pub use lp::*;
 pub use new_token::*;
 pub use pricefeeds::*;
 pub use withdraw::*;
-declare_id!("J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY");
+declare_id!("AM4tcZNBHBGaDeLEPgzuoEJbHbXqn2odYm9yXC93iUu");
 
 #[program]
 pub mod interest {

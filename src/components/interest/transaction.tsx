@@ -1,15 +1,18 @@
 import React, { useState, useCallback } from 'react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey, ConfirmedSignatureInfo } from '@solana/web3.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-
 import { Badge } from '../ui/badge';
-import { Loader2, Search, Activity, Clock, MessageSquare } from 'lucide-react';
-import { decodeInstruction, getProgramName, logInstructionDiscriminator, type DecodedInstruction } from '../providers/transaction.ts';
-import { InterestIDL } from 'anchor/src/source.ts';
+import { Loader2, Search, Coins, BarChart, Users, Hash, ShieldCheck, AlertCircle } from 'lucide-react';
+import { decodeInstruction, getProgramName, type DecodedInstruction } from '../providers/transaction.ts';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Interest_PROGRAM_ID } from 'anchor/src/source.ts';
 
+// The program address from your transaction.ts file
+const PROGRAM_ID = Interest_PROGRAM_ID.toBase58();
 const CLUSTER_URL = "https://api.devnet.solana.com";
 
+// --- Interfaces ---
 interface TransactionSummary {
     signature: string;
     blockTime: number | null;
@@ -25,26 +28,28 @@ interface AnalysisSummary {
     totalTransactions: number;
     programCalls: Record<string, number>;
     instructionTypes: Record<string, number>;
-    actionSummaries: Record<string, number>;
     uniqueAccounts: Set<string>;
     dateRange: { earliest: Date | null; latest: Date | null };
     totalFees: number;
 }
 
+// --- Main Component ---
 const SolanaTransactionAnalyzer: React.FC = () => {
-    const [programId, setProgramId] = useState(InterestIDL.address);
+    const [programId, setProgramId] = useState(PROGRAM_ID);
     const [transactions, setTransactions] = useState<TransactionSummary[]>([]);
     const [analysis, setAnalysis] = useState<AnalysisSummary | null>(null);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [limit, setLimit] = useState(20);
+    const [lastSignature, setLastSignature] = useState<string | undefined>(undefined);
+    const [canLoadMore, setCanLoadMore] = useState(true);
 
     const connection = new Connection(CLUSTER_URL, 'confirmed');
 
+    // --- Logic ---
     const analyzeTransactions = useCallback((txs: TransactionSummary[]): AnalysisSummary => {
         const programCalls: Record<string, number> = {};
         const instructionTypes: Record<string, number> = {};
-        const actionSummaries: Record<string, number> = {};
         const uniqueAccounts = new Set<string>();
         let totalFees = 0;
         let earliest: Date | null = null;
@@ -56,18 +61,12 @@ const SolanaTransactionAnalyzer: React.FC = () => {
                 if (!earliest || date < earliest) earliest = date;
                 if (!latest || date > latest) latest = date;
             }
-
             totalFees += tx.fee;
             tx.accounts.forEach(account => uniqueAccounts.add(account));
-
             tx.instructions.forEach(ix => {
                 const programName = getProgramName(ix.programId);
                 programCalls[programName] = (programCalls[programName] || 0) + 1;
                 instructionTypes[ix.instructionName] = (instructionTypes[ix.instructionName] || 0) + 1;
-
-                // Count action summaries
-                const actionKey = ix.summary.split(' ')[0] + ' ' + (ix.summary.split(' ')[1] || '');
-                actionSummaries[actionKey] = (actionSummaries[actionKey] || 0) + 1;
             });
         });
 
@@ -75,7 +74,6 @@ const SolanaTransactionAnalyzer: React.FC = () => {
             totalTransactions: txs.length,
             programCalls,
             instructionTypes,
-            actionSummaries,
             uniqueAccounts,
             dateRange: { earliest, latest },
             totalFees
@@ -84,327 +82,281 @@ const SolanaTransactionAnalyzer: React.FC = () => {
 
     const generateHumanSummary = (instructions: DecodedInstruction[]): string => {
         if (instructions.length === 0) return 'No instructions found';
-
         const mainActions = instructions
-            .filter(ix => ix.programId === '6mhY9Me3yh6kvBsejK8TcReGzRkdSYb8Gy9GDLWakzFP')
+            .filter(ix => ix.programId === PROGRAM_ID)
             .map(ix => ix.summary);
-
-        if (mainActions.length > 0) {
-            return mainActions.join(', ');
-        }
-
-        return instructions[0].summary;
+        if (mainActions.length > 0) return mainActions.join(', ');
+        return instructions[0]?.summary || 'Unknown Action';
     };
 
-    const fetchTransactionHistory = async () => {
+    const processSignatures = async (signatures: ConfirmedSignatureInfo[]): Promise<TransactionSummary[]> => {
+        const processedTransactions: TransactionSummary[] = [];
+        for (const txSig of signatures) {
+            try {
+                await new Promise(resolve => setTimeout(resolve, 50)); // Rate limit
+                const tx = await connection.getParsedTransaction(txSig.signature, { maxSupportedTransactionVersion: 0 });
+                if (tx?.transaction) {
+                    const decodedInstructions = tx.transaction.message.instructions.map(ix => decodeInstruction(ix));
+                    const accounts = Array.from(new Set(tx.transaction.message.accountKeys.map(key => key.pubkey.toString())));
+                    processedTransactions.push({
+                        signature: txSig.signature,
+                        blockTime: txSig.blockTime ?? null,
+                        slot: txSig.slot || 0,
+                        status: txSig.confirmationStatus || 'unknown',
+                        instructions: decodedInstructions,
+                        accounts,
+                        fee: tx.meta?.fee || 0,
+                        humanSummary: generateHumanSummary(decodedInstructions)
+                    });
+                }
+            } catch (txError) {
+                console.warn(`Failed to process transaction ${txSig.signature}:`, txError);
+            }
+        }
+        return processedTransactions;
+    };
+
+    const handleInitialFetch = async () => {
         if (!programId.trim()) {
             setError('Please enter a valid program ID');
             return;
         }
-
         setLoading(true);
         setError(null);
         setTransactions([]);
         setAnalysis(null);
+        setLastSignature(undefined);
+        setCanLoadMore(true);
 
         try {
             const pubKey = new PublicKey(programId);
-            console.log(`Fetching transaction history for program: ${programId}`);
+            const signatureInfos = await connection.getSignaturesForAddress(pubKey, { limit: 25 });
 
-            const transactionList = await connection.getSignaturesForAddress(pubKey, {
-                limit: Math.min(limit, 100)
-            });
-
-            console.log(`Found ${transactionList.length} transaction signatures`);
-
-            const processedTransactions: TransactionSummary[] = [];
-
-            for (const [index, txSig] of transactionList.entries()) {
-                console.log(`Processing transaction ${index + 1}/${transactionList.length}: ${txSig.signature}`);
-
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 200));
-
-                    const tx = await connection.getParsedTransaction(txSig.signature, {
-                        maxSupportedTransactionVersion: 0,
-                        commitment: 'confirmed'
-                    });
-
-                    if (tx?.transaction) {
-                        const decodedInstructions = tx.transaction.message.instructions.map(ix => {
-                            if (ix.programId?.toString() === InterestIDL.address) {
-                                logInstructionDiscriminator(ix);
-                            }
-                            return decodeInstruction(ix);
-                        });
-
-
-                        const accounts = Array.from(new Set([
-                            ...tx.transaction.message.accountKeys.map(key => key.pubkey.toString()),
-                            ...decodedInstructions.flatMap(ix => [ix.programId])
-                        ]));
-
-                        const humanSummary = generateHumanSummary(decodedInstructions);
-
-                        processedTransactions.push({
-                            signature: txSig.signature,
-                            blockTime: txSig.blockTime ?? null,
-                            slot: txSig.slot || 0,
-                            status: txSig.confirmationStatus || 'unknown',
-                            instructions: decodedInstructions,
-                            accounts,
-                            fee: tx.meta?.fee || 0,
-                            humanSummary
-                        });
-
-                        console.log(`✓ Transaction ${index + 1} processed: ${humanSummary}`);
-                    }
-                } catch (txError) {
-                    console.warn(`Failed to process transaction ${txSig.signature}:`, txError);
-                }
+            if (signatureInfos.length > 0) {
+                const newTransactions = await processSignatures(signatureInfos);
+                setTransactions(newTransactions);
+                setAnalysis(analyzeTransactions(newTransactions));
+                setLastSignature(signatureInfos[signatureInfos.length - 1]?.signature);
+                setCanLoadMore(signatureInfos.length === 25);
+            } else {
+                setCanLoadMore(false);
             }
 
-            console.log(`Successfully processed ${processedTransactions.length} transactions`);
-            setTransactions(processedTransactions);
-            setAnalysis(analyzeTransactions(processedTransactions));
-
         } catch (err) {
-            console.error('Error fetching transactions:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
         } finally {
             setLoading(false);
         }
     };
 
-    const formatDate = (timestamp: number | null) => {
-        if (!timestamp) return 'Unknown';
-        return new Date(timestamp * 1000).toLocaleString();
-    };
+    const handleLoadMore = async () => {
+        if (!lastSignature || loadingMore) return;
 
-    const truncateAddress = (address: string, length = 8) => {
-        return `${address.slice(0, length)}...${address.slice(-4)}`;
+        setLoadingMore(true);
+        try {
+            const pubKey = new PublicKey(programId);
+            const signatureInfos = await connection.getSignaturesForAddress(pubKey, { limit: 25, before: lastSignature });
+
+            if (signatureInfos.length > 0) {
+                const newTransactions = await processSignatures(signatureInfos);
+                const allTransactions = [...transactions, ...newTransactions];
+                setTransactions(allTransactions);
+                setAnalysis(analyzeTransactions(allTransactions));
+                setLastSignature(signatureInfos[signatureInfos.length - 1]?.signature);
+                setCanLoadMore(signatureInfos.length === 25);
+            } else {
+                setCanLoadMore(false);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch more transactions');
+        } finally {
+            setLoadingMore(false);
+        }
+    }
+
+    // --- Animation Variants ---
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } }
+    };
+    const itemVariants = {
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0 }
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    Solana Transaction Analyzer
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                    Analyze and summarize Solana program transactions with detailed insights
-                </p>
-            </div>
+        <div className="w-full bg-gray-950 text-white min-h-screen">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-8">
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white">Transaction Analyzer</h1>
+                    <p className="text-lg text-gray-400 mt-2">Dive deep into Solana program activity.</p>
+                </motion.div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Search className="h-5 w-5" />
-                        Transaction Fetcher
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex gap-4">
-                        {/* <Input
-                            placeholder="Enter Solana Program ID"
-                            value={programId}
-                            onChange={(e) => setProgramId(e.target.value)}
-                            className="flex-1"
-                        /> */}
-                        {/* <Input
-                            type="number"
-                            placeholder="Limit"
-                            value={limit}
-                            onChange={(e) => setLimit(Math.min(100, Math.max(1, parseInt(e.target.value) || 10)))}
-                            className="w-24"
-                            min="1"
-                            max="100" */}
-                        {/* /> */}
-                        <Button
-                            onClick={fetchTransactionHistory}
-                            disabled={loading}
-                            className="min-w-[120px]"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Fetching...
-                                </>
-                            ) : (
-                                'Analyze'
-                            )}
-                        </Button>
-                    </div>
-                    {error && (
-                        <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">
-                            {error}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {analysis && (
-                <Card>
+                <Card className="bg-gray-900/50 border-gray-800">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Activity className="h-5 w-5" />
-                            Analysis Summary
+                        <CardTitle className="flex items-center gap-3 text-xl text-white">
+                            <Search className="h-5 w-5 text-purple-400" />
+                            Analyze Program
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                            <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                <div className="text-2xl font-bold text-blue-600">{analysis.totalTransactions}</div>
-                                <div className="text-sm text-muted-foreground">Total Transactions</div>
-                            </div>
-                            <div className="text-center p-4 bg-green-50 rounded-lg">
-                                <div className="text-2xl font-bold text-green-600">{analysis.uniqueAccounts.size}</div>
-                                <div className="text-sm text-muted-foreground">Unique Accounts</div>
-                            </div>
-                            <div className="text-center p-4 bg-purple-50 rounded-lg">
-                                <div className="text-2xl font-bold text-purple-600">{Object.keys(analysis.instructionTypes).length}</div>
-                                <div className="text-sm text-muted-foreground">Instruction Types</div>
-                            </div>
-                            <div className="text-center p-4 bg-orange-50 rounded-lg">
-                                <div className="text-2xl font-bold text-orange-600">{(analysis.totalFees / 1e9).toFixed(4)} SOL</div>
-                                <div className="text-sm text-muted-foreground">Total Fees</div>
-                            </div>
-                        </div>
+                    <CardContent className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-grow p-3 bg-gray-800 border border-gray-700 rounded-md text-gray-300 font-mono text-sm flex items-center break-all">{programId}</div>
+                        <Button onClick={handleInitialFetch} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white h-12 w-full sm:w-auto">
+                            {loading ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Analyzing...</> : 'Analyze Transactions'}
+                        </Button>
+                    </CardContent>
+                </Card>
 
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <div>
-                                <h3 className="font-semibold mb-3">Most Called Programs</h3>
-                                <div className="space-y-2">
-                                    {Object.entries(analysis.programCalls)
-                                        .sort(([, a], [, b]) => b - a)
-                                        .slice(0, 5)
-                                        .map(([program, count]) => (
-                                            <div key={program} className="flex justify-between items-center p-2 bg-black-50 rounded">
-                                                <span className="text-sm">{program}</span>
-                                                <Badge variant="secondary">{count} calls</Badge>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                            className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2">
+                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <span><strong>Error:</strong> {error}</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                            <div>
-                                <h3 className="font-semibold mb-3">Instruction Types</h3>
-                                <div className="space-y-2">
-                                    {Object.entries(analysis.instructionTypes)
-                                        .sort(([, a], [, b]) => b - a)
-                                        .slice(0, 5)
-                                        .map(([type, count]) => (
-                                            <div key={type} className="flex justify-between items-center p-2 bg-black-50 rounded">
-                                                <span className="capitalize text-sm">{type}</span>
-                                                <Badge variant="outline">{count}</Badge>
-                                            </div>
-                                        ))}
+                {analysis && (
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+                        <Card className="bg-gray-900/50 border-gray-800">
+                            <CardHeader><CardTitle className="text-xl text-white">Analysis Summary</CardTitle></CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <StatCard icon={Hash} value={analysis.totalTransactions} label="Transactions" />
+                                    <StatCard icon={Users} value={analysis.uniqueAccounts.size} label="Unique Accounts" />
+                                    <StatCard icon={BarChart} value={Object.keys(analysis.instructionTypes).length} label="Instruction Types" />
+                                    <StatCard icon={Coins} value={`${(analysis.totalFees / 1e9).toFixed(6)} SOL`} label="Total Fees" />
                                 </div>
-                            </div>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <AnalysisChart title="Top Instructions" data={analysis.instructionTypes} />
+                                    <AnalysisList title="Top Programs Called" data={analysis.programCalls} />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
 
-                            <div>
-                                <h3 className="font-semibold mb-3">Action Summary</h3>
-                                <div className="space-y-2">
-                                    {Object.entries(analysis.actionSummaries)
-                                        .sort(([, a], [, b]) => b - a)
-                                        .slice(0, 5)
-                                        .map(([action, count]) => (
-                                            <div key={action} className="flex justify-between items-center p-2 bg-black-50 rounded">
-                                                <span className="capitalize text-sm">{action}</span>
-                                                <Badge variant="default">{count}</Badge>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {analysis.dateRange.earliest && analysis.dateRange.latest && (
-                            <div className="mt-6 p-4 bg-black-50 rounded-lg">
-                                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                                    <Clock className="h-4 w-4" />
-                                    Time Range
-                                </h3>
-                                <div className="text-sm text-muted-foreground">
-                                    From: {analysis.dateRange.earliest.toLocaleString()} <br />
-                                    To: {analysis.dateRange.latest.toLocaleString()}
-                                </div>
+                {transactions.length > 0 && (
+                    <motion.div className="space-y-4" variants={containerVariants} initial="hidden" animate="visible">
+                        <h2 className="text-2xl font-bold text-white pt-4">Transaction Details</h2>
+                        {transactions.map((tx) => (
+                            <motion.div key={tx.signature} variants={itemVariants}>
+                                <TransactionCard tx={tx} />
+                            </motion.div>
+                        ))}
+                        {canLoadMore && (
+                            <div className="flex justify-center pt-4">
+                                <Button onClick={handleLoadMore} disabled={loadingMore} variant="outline" className="border-gray-700 hover:bg-gray-800">
+                                    {loadingMore ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Loading More...</> : 'Load More'}
+                                </Button>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
-            )}
-
-            {transactions.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <MessageSquare className="h-5 w-5" />
-                            Transaction Activity Summary ({transactions.length})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {transactions.map((tx, index) => (
-                                <div key={tx.signature} className="p-4 border rounded-lg">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Badge variant="default" className="text-xs">
-                                                    Transaction #{index + 1}
-                                                </Badge>
-                                                <span className="text-sm text-muted-foreground">
-                                                    {formatDate(tx.blockTime)}
-                                                </span>
-                                            </div>
-                                            <div className="text-lg font-medium text-green-700 mb-2">
-                                                {tx.humanSummary}
-                                            </div>
-                                            <div className="font-mono text-xs text-muted-foreground">
-                                                {truncateAddress(tx.signature, 16)}
-                                            </div>
-                                        </div>
-                                        <Badge variant={tx.status === 'finalized' ? 'default' : 'secondary'}>
-                                            {tx.status}
-                                        </Badge>
-                                    </div>
-
-                                    <div className="text-sm text-muted-foreground mb-3">
-                                        Fee: {(tx.fee / 1e9).toFixed(6)} SOL | Slot: {tx.slot.toLocaleString()}
-                                    </div>
-
-                                    <details className="mt-3">
-                                        <summary className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
-                                            View Detailed Instructions ({tx.instructions.length})
-                                        </summary>
-                                        <div className="mt-3 pl-4 border-l-2 border-gray-200 space-y-2">
-                                            {tx.instructions.map((ix, ixIndex) => (
-                                                <div key={ixIndex} className="py-2 bg-gray-50 rounded p-3">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {ix.instructionName}
-                                                        </Badge>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {getProgramName(ix.programId)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-sm font-medium">{ix.summary}</div>
-                                                    {Object.keys(ix.args).length > 0 && (
-                                                        <div className="text-xs text-muted-foreground mt-1">
-                                                            Args: {JSON.stringify(ix.args)}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </details>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 };
+
+// --- Sub-components for better structure ---
+const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType; value: string | number; label: string }) => (
+    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 flex items-center gap-4">
+        <div className="p-2 bg-purple-600/20 border border-purple-500/30 rounded-md flex-shrink-0">
+            <Icon className="h-6 w-6 text-purple-400" />
+        </div>
+        <div className="min-w-0">
+            <div className="text-2xl font-bold text-white truncate">{value}</div>
+            <div className="text-sm text-gray-400">{label}</div>
+        </div>
+    </div>
+);
+
+const AnalysisList = ({ title, data }: { title: string; data: Record<string, number> }) => (
+    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <h3 className="font-semibold mb-3 text-white">{title}</h3>
+        <div className="space-y-2">
+            {Object.entries(data).sort(([, a], [, b]) => b - a).slice(0, 5).map(([name, count]) => (
+                <div key={name} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-300 capitalize truncate pr-2">{name === 'Unknown' ? 'Unrecognized Instruction' : name}</span>
+                    <Badge variant="secondary" className="bg-gray-700 text-gray-300 flex-shrink-0">{count}</Badge>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const AnalysisChart = ({ title, data }: { title: string; data: Record<string, number> }) => {
+    const sortedData = Object.entries(data).sort(([, a], [, b]) => b - a).slice(0, 5);
+    const maxValue = Math.max(...sortedData.map(([, count]) => count), 0);
+
+    return (
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <h3 className="font-semibold mb-4 text-white">{title}</h3>
+            <div className="space-y-3">
+                {sortedData.map(([name, count]) => (
+                    <div key={name} className="grid grid-cols-[auto_1fr] items-center gap-3 text-sm">
+                        <span className="text-gray-300 capitalize truncate text-right">{name === 'Unknown' ? 'Unrecognized' : name}</span>
+                        <div className="w-full bg-gray-700 rounded-full h-6 flex items-center">
+                            <div
+                                className="bg-purple-600 h-6 rounded-full flex items-center justify-end pr-2"
+                                style={{ width: `${maxValue > 0 ? (count / maxValue) * 100 : 0}%` }}
+                            >
+                                <span className="text-white text-xs font-medium">{count}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const TransactionCard = ({ tx }: { tx: TransactionSummary }) => (
+    <Card className="bg-gray-900/50 border-gray-800">
+        <CardHeader>
+            <div className="flex justify-between items-start gap-4">
+                <div className="min-w-0">
+                    <CardTitle className="text-lg font-medium text-white">{tx.humanSummary}</CardTitle>
+                    <p className="text-xs font-mono text-gray-500 mt-1 break-all">{tx.signature}</p>
+                </div>
+                <Badge variant={tx.status === 'finalized' ? 'default' : 'secondary'} className="bg-green-600/20 text-green-400 border-green-500/30 flex-shrink-0">
+                    <ShieldCheck className="h-3 w-3 mr-1.5" />
+                    {tx.status}
+                </Badge>
+            </div>
+        </CardHeader>
+        <CardContent>
+            <details className="group">
+                <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-400 hover:text-white">
+                    <span>View Details</span>
+                    <span className="transition-transform duration-300 group-open:rotate-180">▼</span>
+                </summary>
+                <div className="mt-4 pl-4 border-l-2 border-gray-800 space-y-4">
+                    {tx.instructions.map((ix: DecodedInstruction, ixIndex: number) => (
+                        <div key={ixIndex} className="text-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="border-gray-700 text-gray-300">{ix.instructionName === 'Unknown' ? 'Unrecognized' : ix.instructionName}</Badge>
+                                <span className="text-xs text-gray-500">{getProgramName(ix.programId)}</span>
+                            </div>
+                            <p className="text-gray-300">{ix.summary}</p>
+                            {Object.keys(ix.args).length > 0 && (
+                                <div className="text-xs text-gray-500 mt-2 bg-gray-800/50 p-2 rounded-md font-mono">
+                                    <h4 className="font-semibold text-gray-400 mb-1">Arguments:</h4>
+                                    {Object.entries(ix.args).map(([key, value]) => (
+                                        <div key={key} className="flex justify-between gap-2">
+                                            <span className="flex-shrink-0">{key}:</span>
+                                            <span className="break-all text-right">{String(value)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </details>
+        </CardContent>
+    </Card>
+);
 
 export default SolanaTransactionAnalyzer;

@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/interest.json`.
  */
 export type Interest = {
-  "address": "J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY",
+  "address": "AM4tcZNBHBGaDeLEPgzuoEJbHbXqn2odYm9yXC93iUu",
   "metadata": {
     "name": "interest",
     "version": "0.1.0",

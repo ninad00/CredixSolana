@@ -480,7 +480,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
 
     // Fallback for other programs or failed decoding
     return {
-        instructionName: instruction.parsed?.type || instruction.program || 'Unknown',
+        instructionName: instruction.parsed?.type || instruction.program || 'Unknown',     
         summary: getGenericInstructionSummary(instruction),
         args: instruction.parsed?.info || {},
         programId: programId || 'Unknown'
