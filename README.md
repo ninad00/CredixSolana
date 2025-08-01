@@ -10,7 +10,7 @@ https://drive.google.com/file/d/1nH1-U5taYSPiEYxgRFSXEEZxL0RNyEuA/view?usp=shari
 
 https://ninad00.github.io/CredixSolana/
 
-### Screeshots
+### Screenshots
 
 ![image](public/ss1.png)
 ![image](public/ss2.png)
