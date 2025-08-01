@@ -8,6 +8,7 @@ import { resolve } from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/CredixSolana/',
   plugins: [
     react(),
     viteTsconfigPaths({

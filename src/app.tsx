@@ -1,7 +1,7 @@
 import { AppProviders } from '@/components/app-providers.tsx'
 import { AppLayout } from '@/components/app-layout.tsx'
-import { RouteObject, useRoutes } from 'react-router'
-import { lazy, Suspense, useMemo } from 'react'
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+import { Suspense, lazy, useMemo } from 'react';
 import { ConnectionProvider } from '@solana/wallet-adapter-react'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { clusterApiUrl } from '@solana/web3.js'
@@ -23,16 +23,15 @@ const NotFound = lazy(() => import('./components/Not-Found'))
 
 const links = [
   { label: 'Home', path: '/' },
-  // { label: 'Interest Program', path: '/interest' },
   { label: 'Deposit Token', path: '/deposit' },
   { label: 'Your Deposits', path: '/depositList' },
   { label: 'Provide Liquidity', path: '/liquidity' },
   { label: 'Claim Liquidity', path: '/claimliquidity' },
   { label: 'Liquidate', path: '/liquidate' },
   { label: 'History', path: '/history' },
-]
+];
 
-const routes: RouteObject[] = [
+const routes = [
   {
     path: '/',
     element: (
@@ -121,22 +120,27 @@ const routes: RouteObject[] = [
   },
 ]
 
-export function App() {
+function AppRoutes() {
   const router = useRoutes(routes)
 
-  // Solana wallet setup
+  return router
+}
+
+export function App() {
+  // Set the basename for GitHub Pages
+  const basename = import.meta.env.BASE_URL || '/';
   const network = WalletAdapterNetwork.Devnet
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      {/* <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider> */}
       <AppProviders>
-        <AppLayout links={links}>{router}</AppLayout>
+        <Router basename={basename}>
+          <AppLayout links={links}>
+            <AppRoutes />
+          </AppLayout>
+        </Router>
       </AppProviders>
-      {/* </WalletModalProvider> */}
-      {/* </WalletProvider> */}
     </ConnectionProvider>
   )
 }
