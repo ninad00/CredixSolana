@@ -174,6 +174,14 @@ CredixSolana is a decentralized finance (DeFi) protocol built on the Solana bloc
 npm install
 
 npm run dev
+```
 
-## 11. Testing
+### 11 Testing
+
+- Unit tests for smart contracts.
+-Integration tests for end-to-end flows.
+-Test coverage reporting.
+### 12 conclusion
+
+CredixSolana is a sophisticated DeFi protocol that brings decentralized lending and borrowing to the Solana blockchain. With its modular architecture and comprehensive feature set, it provides a solid foundation for building a robust financial ecosystem. The codebase follows modern development practices and includes thorough testing and security considerations.
 
