@@ -3,7 +3,8 @@ import { Connection, PublicKey, ConfirmedSignatureInfo } from '@solana/web3.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Loader2, Search, Coins, BarChart, Users, Hash, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Loader2, Search, Coins, BarChart, Users, Hash, ShieldCheck, AlertCircle, ExternalLink, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { decodeInstruction, getProgramName, type DecodedInstruction } from '../providers/transaction.ts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Interest_PROGRAM_ID } from 'anchor/src/source.ts';
@@ -93,7 +94,7 @@ const SolanaTransactionAnalyzer: React.FC = () => {
         const processedTransactions: TransactionSummary[] = [];
         for (const txSig of signatures) {
             try {
-                await new Promise(resolve => setTimeout(resolve, 50)); // Rate limit
+                await new Promise(resolve => setTimeout(resolve, 20)); // Rate limit
                 const tx = await connection.getParsedTransaction(txSig.signature, { maxSupportedTransactionVersion: 0 });
                 if (tx?.transaction) {
                     const decodedInstructions = tx.transaction.message.instructions.map(ix => decodeInstruction(ix));
@@ -155,7 +156,7 @@ const SolanaTransactionAnalyzer: React.FC = () => {
         setLoadingMore(true);
         try {
             const pubKey = new PublicKey(programId);
-            const signatureInfos = await connection.getSignaturesForAddress(pubKey, { limit: 25, before: lastSignature });
+            const signatureInfos = await connection.getSignaturesForAddress(pubKey, { limit: 20, before: lastSignature });
 
             if (signatureInfos.length > 0) {
                 const newTransactions = await processSignatures(signatureInfos);
@@ -228,10 +229,10 @@ const SolanaTransactionAnalyzer: React.FC = () => {
                                     <StatCard icon={BarChart} value={Object.keys(analysis.instructionTypes).length} label="Instruction Types" />
                                     <StatCard icon={Coins} value={`${(analysis.totalFees / 1e9).toFixed(6)} SOL`} label="Total Fees" />
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-6">
+                                {/* <div className="grid md:grid-cols-2 gap-6">
                                     <AnalysisChart title="Top Instructions" data={analysis.instructionTypes} />
                                     <AnalysisList title="Top Programs Called" data={analysis.programCalls} />
-                                </div>
+                                </div> */}
                             </CardContent>
                         </Card>
                     </motion.div>
@@ -313,20 +314,39 @@ const AnalysisChart = ({ title, data }: { title: string; data: Record<string, nu
 };
 
 const TransactionCard = ({ tx }: { tx: TransactionSummary }) => (
-    <Card className="bg-gray-900/50 border-gray-800">
-        <CardHeader>
-            <div className="flex justify-between items-start gap-4">
-                <div className="min-w-0">
-                    <CardTitle className="text-lg font-medium text-white">{tx.humanSummary}</CardTitle>
-                    <p className="text-xs font-mono text-gray-500 mt-1 break-all">{tx.signature}</p>
+    <Card className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <div className="ml-4 flex-grow min-w-0">
+            <p className="text-sm font-medium text-gray-300">
+                Transaction Signature:
+            </p>
+            <p className="mt-0.5 truncate text-xs font-mono text-gray-400  px-2 py-1 rounded-lg ">
+                {tx.signature}
+            </p>
+        </div>
+
+        <CardHeader className="flex items-center gap-2 justify-between">
+            <div className="text-green-400 text-sm p-3 border border-green-800 rounded-md flex flex-cols-2 items-start gap-2">
+
+                <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+
+                <div className="flex-grow min-w-0">
+                    <a
+                        href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-green-400 hover:text-green-300 underline flex items-center"
+                    >
+                        View Transaction <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
                 </div>
-                <Badge variant={tx.status === 'finalized' ? 'default' : 'secondary'} className="bg-green-600/20 text-green-400 border-green-500/30 flex-shrink-0">
-                    <ShieldCheck className="h-3 w-3 mr-1.5" />
-                    {tx.status}
-                </Badge>
             </div>
+            <Badge variant={tx.status === 'finalized' ? 'default' : 'secondary'} className="bg-green-600/20 text-green-400 border-green-500/30 flex-shrink-0">
+                <ShieldCheck className="h-3 w-3 mr-1.5" />
+                {tx.status}
+            </Badge>
         </CardHeader>
-        <CardContent>
+
+        {/* <CardContent>
             <details className="group">
                 <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-400 hover:text-white">
                     <span>View Details</span>
@@ -355,7 +375,7 @@ const TransactionCard = ({ tx }: { tx: TransactionSummary }) => (
                     ))}
                 </div>
             </details>
-        </CardContent>
+        </CardContent> */}
     </Card>
 );
 

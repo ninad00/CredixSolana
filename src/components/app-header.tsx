@@ -26,7 +26,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
           <div className="flex items-center justify-between h-16">
             {/* Logo and Desktop Navigation */}
             <div className="flex items-center space-x-8">
-              <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white hover:opacity-80 hover:scale-105 transition-all">
+              <Link to="/" className="text-2xl font-bold text-gray-900 dark:text-white hover:opacity-80 hover:scale-105 transition-all vamos">
                 CREDIX
               </Link>
               {/* Changed md:flex to lg:flex */}
