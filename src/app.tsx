@@ -8,6 +8,7 @@ import { clusterApiUrl } from '@solana/web3.js'
 import './index.css'
 import { FullPageLoading } from './components/FullPageLoading'
 import { LoadingSpinner } from './components/LoadingSpinner'
+import path from 'path'
 
 const LazyAccountIndex = lazy(() => import('./Index'))
 const LazyDeposit = lazy(() => import('@/components/interest/depositToken'))
@@ -16,16 +17,19 @@ const LazyLiquidity = lazy(() => import('@/components/interest/giveLiquidity'))
 const LazyclaimLiquidity = lazy(() => import('@/components/interest/withdrawLiq'))
 const LazyLiquidate = lazy(() => import('@/components/interest/liquidate'))
 const LazyHistory = lazy(() => import('@/components/interest/transaction'))
+const LazyEngine = lazy(() => import('@/components/interest/interest-feature'))
 const NotFound = lazy(() => import('./components/Not-Found'))
 
 const links = [
   { label: 'Home', path: '/' },
+  // { label: 'Engine', path: '/engine' },
   { label: 'Deposit Token', path: '/deposit' },
   { label: 'Your Deposits', path: '/depositList' },
   { label: 'Provide Liquidity', path: '/liquidity' },
   { label: 'Claim Liquidity', path: '/claimliquidity' },
   { label: 'Liquidate', path: '/liquidate' },
   { label: 'History', path: '/history' },
+
 ];
 
 const routes = [
@@ -37,6 +41,14 @@ const routes = [
       </Suspense>
     ),
     index: true,
+  },
+  {
+    path: 'engine',
+    element: (
+      <Suspense fallback={<FullPageLoading />}>
+        <LazyEngine />
+      </Suspense>
+    ),
   },
   {
     path: 'deposit',

@@ -1,10 +1,16 @@
 
 
 const INTEREST_IDL = {
-    "address": "J4bfWKCuz2J1gzbwhosrhRV5Q1bQATjvAmnzP7SMYptY",
+    "address": "AM4tcZNBHBGaDeLEPgzuoEJbHbXqn2odYm9yXC93iUu",
+    "metadata": {
+        "name": "interest",
+        "version": "0.1.0",
+        "spec": "0.1.0",
+        "description": "Created with Anchor"
+    },
     "instructions": [
         {
-            "name": "depositCollateral",
+            "name": "deposit_collateral",
             "discriminator": [
                 156,
                 131,
@@ -15,10 +21,172 @@ const INTEREST_IDL = {
                 162,
                 120
             ],
-            "args": [{ "name": "amount", "type": "u64" }]
+            "accounts": [
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "user_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    117,
+                                    115,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "deposit",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "config",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "writable": true
+                },
+                {
+                    "name": "token_program"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                }
+            ],
+            "args": [
+                {
+                    "name": "amount",
+                    "type": "u64"
+                }
+            ]
         },
         {
-            "name": "giveLiquidity",
+            "name": "give_liquidity",
             "discriminator": [
                 243,
                 205,
@@ -29,13 +197,175 @@ const INTEREST_IDL = {
                 63,
                 7
             ],
+            "accounts": [
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "user_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "lp_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    108,
+                                    112
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "liq_deposit",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    108,
+                                    105,
+                                    113,
+                                    95,
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "config",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "writable": true
+                },
+                {
+                    "name": "token_program"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                }
+            ],
             "args": [
-                { "name": "amount", "type": "u64" },
-
+                {
+                    "name": "amount",
+                    "type": "u64"
+                }
             ]
         },
         {
-            "name": "liquidateUser",
+            "name": "liquidate_user",
             "discriminator": [
                 121,
                 20,
@@ -46,17 +376,332 @@ const INTEREST_IDL = {
                 66,
                 95
             ],
-            "args": [{
-                "name": "debtToCover",
-                "type": "u64"
-            },
-            {
-                "name": "newPrice",
-                "type": "u64"
-            }]
+            "accounts": [
+                {
+                    "name": "engine",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    101,
+                                    110,
+                                    103,
+                                    105,
+                                    110,
+                                    101
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "user_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    117,
+                                    115,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user_data.user",
+                                "account": "UserData"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "deposit",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user_data.user",
+                                "account": "UserData"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "liquidator",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "config",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "liquidator_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "liquidator"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "dsc_mint",
+                    "writable": true
+                },
+                {
+                    "name": "liquidator_dsc_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "liquidator"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "dsc_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "price",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    114,
+                                    105,
+                                    99,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "token_program"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                }
+            ],
+            "args": [
+                {
+                    "name": "debt_to_cover",
+                    "type": "u64"
+                },
+                {
+                    "name": "new_price",
+                    "type": "u64"
+                }
+            ]
         },
         {
-            "name": "mintDsc",
+            "name": "mint_dsc",
             "discriminator": [
                 142,
                 219,
@@ -67,20 +712,218 @@ const INTEREST_IDL = {
                 179,
                 173
             ],
+            "accounts": [
+                {
+                    "name": "engine",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    101,
+                                    110,
+                                    103,
+                                    105,
+                                    110,
+                                    101
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "user_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    117,
+                                    115,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint",
+                    "relations": [
+                        "config"
+                    ]
+                },
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "dsc_mint",
+                    "writable": true
+                },
+                {
+                    "name": "deposit",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "config",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "price",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    114,
+                                    105,
+                                    99,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "user_dsc_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "dsc_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "token_program"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                }
+            ],
             "args": [
                 {
                     "name": "amount",
                     "type": "u64"
                 },
                 {
-                    "name": "newPrice",
+                    "name": "new_price",
                     "type": "u64"
                 }
             ]
         },
-
         {
-            "name": "redeemLiquidity",
+            "name": "redeem_liquidity",
             "discriminator": [
                 180,
                 117,
@@ -91,11 +934,230 @@ const INTEREST_IDL = {
                 97,
                 211
             ],
-            "args": [],
+            "accounts": [
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true,
+                    "relations": [
+                        "liq_deposit"
+                    ]
+                },
+                {
+                    "name": "lp_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    108,
+                                    112
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint",
+                    "relations": [
+                        "liq_deposit",
+                        "config"
+                    ]
+                },
+                {
+                    "name": "liq_deposit",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    108,
+                                    105,
+                                    113,
+                                    95,
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "config",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                },
+                {
+                    "name": "token_program"
+                }
+            ],
+            "args": []
         },
-
         {
-            "name": "startEngine",
+            "name": "start_engine",
             "discriminator": [
                 47,
                 24,
@@ -106,28 +1168,63 @@ const INTEREST_IDL = {
                 158,
                 142
             ],
+            "accounts": [
+                {
+                    "name": "engine",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    101,
+                                    110,
+                                    103,
+                                    105,
+                                    110,
+                                    101
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "authority",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "dsc_mint"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "token_program"
+                }
+            ],
             "args": [
                 {
-                    "name": "liquidationThreshold",
+                    "name": "liquidation_threshold",
                     "type": "u64"
                 },
                 {
-                    "name": "minHealthFactor",
+                    "name": "min_health_factor",
                     "type": "u64"
                 },
                 {
-                    "name": "liquidationBonus",
+                    "name": "liquidation_bonus",
                     "type": "u64"
                 },
                 {
-                    "name": "feePercent",
+                    "name": "fee_percent",
                     "type": "u64"
                 }
             ]
         },
-
         {
-            "name": "startToken",
+            "name": "start_token",
             "discriminator": [
                 253,
                 172,
@@ -138,9 +1235,132 @@ const INTEREST_IDL = {
                 168,
                 65
             ],
-            "args": [
+            "accounts": [
+                {
+                    "name": "config",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
                 {
                     "name": "price",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    114,
+                                    105,
+                                    99,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "vault",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "admin",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "token_program"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                }
+            ],
+            "args": [
+                {
+                    "name": "_price",
                     "type": "u64"
                 }
             ]
@@ -157,6 +1377,41 @@ const INTEREST_IDL = {
                 152,
                 193
             ],
+            "accounts": [
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "user_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    117,
+                                    115,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint"
+                }
+            ],
             "args": [
                 {
                     "name": "hfbn",
@@ -165,7 +1420,7 @@ const INTEREST_IDL = {
             ]
         },
         {
-            "name": "withdrawCollateral",
+            "name": "withdraw_collateral",
             "discriminator": [
                 115,
                 135,
@@ -176,19 +1431,917 @@ const INTEREST_IDL = {
                 138,
                 150
             ],
+            "accounts": [
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true,
+                    "relations": [
+                        "deposit"
+                    ]
+                },
+                {
+                    "name": "user_data",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    117,
+                                    115,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "engine",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    101,
+                                    110,
+                                    103,
+                                    105,
+                                    110,
+                                    101
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint",
+                    "relations": [
+                        "deposit",
+                        "price",
+                        "config"
+                    ]
+                },
+                {
+                    "name": "dsc_mint",
+                    "writable": true
+                },
+                {
+                    "name": "deposit",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    100,
+                                    101,
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "price",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    114,
+                                    105,
+                                    99,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "config",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_dsc_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "dsc_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                },
+                {
+                    "name": "token_program"
+                }
+            ],
             "args": [
                 {
-                    "name": "dscToGive",
+                    "name": "dsc_to_give",
                     "type": "u64"
                 },
                 {
-                    "name": "newPrice",
+                    "name": "new_price",
                     "type": "u64"
                 }
             ]
         }
-
-
+    ],
+    "accounts": [
+        {
+            "name": "Config",
+            "discriminator": [
+                155,
+                12,
+                170,
+                224,
+                30,
+                250,
+                204,
+                130
+            ]
+        },
+        {
+            "name": "Deposit",
+            "discriminator": [
+                148,
+                146,
+                121,
+                66,
+                207,
+                173,
+                21,
+                227
+            ]
+        },
+        {
+            "name": "Engine",
+            "discriminator": [
+                246,
+                94,
+                41,
+                147,
+                231,
+                121,
+                110,
+                19
+            ]
+        },
+        {
+            "name": "LpData",
+            "discriminator": [
+                248,
+                173,
+                196,
+                3,
+                123,
+                50,
+                218,
+                10
+            ]
+        },
+        {
+            "name": "LqDeposit",
+            "discriminator": [
+                39,
+                77,
+                98,
+                106,
+                180,
+                33,
+                68,
+                207
+            ]
+        },
+        {
+            "name": "Price",
+            "discriminator": [
+                50,
+                107,
+                127,
+                61,
+                83,
+                36,
+                39,
+                75
+            ]
+        },
+        {
+            "name": "UserData",
+            "discriminator": [
+                139,
+                248,
+                167,
+                203,
+                253,
+                220,
+                210,
+                221
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "HealthFactors",
+            "discriminator": [
+                180,
+                101,
+                77,
+                160,
+                202,
+                252,
+                201,
+                107
+            ]
+        },
+        {
+            "name": "LiquidityProvided",
+            "discriminator": [
+                94,
+                97,
+                39,
+                34,
+                15,
+                96,
+                79,
+                135
+            ]
+        },
+        {
+            "name": "LiquidityRedeemed",
+            "discriminator": [
+                78,
+                81,
+                213,
+                176,
+                1,
+                84,
+                138,
+                65
+            ]
+        },
+        {
+            "name": "TokenDeposited",
+            "discriminator": [
+                104,
+                7,
+                18,
+                187,
+                94,
+                141,
+                251,
+                120
+            ]
+        },
+        {
+            "name": "TokenLiquidated",
+            "discriminator": [
+                106,
+                151,
+                243,
+                246,
+                247,
+                212,
+                191,
+                12
+            ]
+        },
+        {
+            "name": "TokenRedeemed",
+            "discriminator": [
+                75,
+                7,
+                43,
+                228,
+                204,
+                167,
+                97,
+                76
+            ]
+        }
+    ],
+    "errors": [
+        {
+            "code": 6000,
+            "name": "AmountLessThanZero",
+            "msg": "Amount must be greater than zero"
+        },
+        {
+            "code": 6001,
+            "name": "InvalidToken",
+            "msg": "Invalid token"
+        },
+        {
+            "code": 6002,
+            "name": "LessHealthFactor",
+            "msg": "Health factor too low"
+        },
+        {
+            "code": 6003,
+            "name": "NotEnoughTokensInCollateral",
+            "msg": "Not enough tokens in collateral"
+        },
+        {
+            "code": 6004,
+            "name": "NoNeedToLiquidate",
+            "msg": "No need to liquidate"
+        },
+        {
+            "code": 6005,
+            "name": "HealthFactorNotImproved",
+            "msg": "Health factor not improved"
+        },
+        {
+            "code": 6006,
+            "name": "NotEnoughDebt",
+            "msg": "Not enough debt"
+        },
+        {
+            "code": 6007,
+            "name": "UnauthorizedUser",
+            "msg": "Unauthorized user"
+        },
+        {
+            "code": 6008,
+            "name": "Overflow"
+        },
+        {
+            "code": 6009,
+            "name": "DivisionError"
+        },
+        {
+            "code": 6010,
+            "name": "InvalidPrice"
+        },
+        {
+            "code": 6011,
+            "name": "MathOverflow"
+        },
+        {
+            "code": 6012,
+            "name": "MustRepayDscFirst"
+        },
+        {
+            "code": 6013,
+            "name": "ZeroTotalLiquidity"
+        },
+        {
+            "code": 6014,
+            "name": "CannotLiquidateSelf"
+        },
+        {
+            "code": 6015,
+            "name": "TooMuchRepay"
+        },
+        {
+            "code": 6016,
+            "name": "OverCollateralLimit"
+        },
+        {
+            "code": 6017,
+            "name": "LiquidatorInsufficientDSC"
+        }
+    ],
+    "types": [
+        {
+            "name": "Config",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "token_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "total_liq",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "total_collected",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "vault",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "authority",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Deposit",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_amt",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "config_account",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Engine",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "authority",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "dsc_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "liquidation_threshold",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "min_health_factor",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "liquidation_bonus",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "fee_percent",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "HealthFactors",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "health_factor",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityProvided",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityRedeemed",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "interest",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LpData",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_amt",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LqDeposit",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_amt",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "config_account",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Price",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "token_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "price",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "TokenDeposited",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "TokenLiquidated",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "liquidator",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "TokenRedeemed",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "UserData",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "user",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "borrowed_amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "primary_token",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "hf",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "token_balance",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    }
+                ]
+            }
+        }
+    ],
+    "constants": [
+        {
+            "name": "MAXIMUM_AGE",
+            "type": "u64",
+            "value": "100"
+        }
     ]
 };
 
@@ -197,6 +2350,16 @@ export interface DecodedInstruction {
     summary: string;
     args: Record<string, any>;
     programId: string;
+}
+
+interface SolanaInstruction {
+    programId: { toString: () => string };
+    data: string;
+    parsed?: {
+        type?: string;
+        info?: Record<string, any>;
+    };
+    program?: string;
 }
 
 // make sure bs58 is installed
@@ -208,7 +2371,7 @@ const decodeInstructionData = (data: string): Uint8Array => {
 
 };
 
-export const logInstructionDiscriminator = (instruction: any) => {
+export const logInstructionDiscriminator = (instruction: SolanaInstruction) => {
     const data = instruction.data;
     if (!data) {
         console.log("No data in instruction.");
@@ -265,7 +2428,7 @@ const formatTokenAmount = (amount: bigint, decimals: number = 6): string => {
     return `${wholePart}.${fractionalPart.toString().padStart(decimals, '0').replace(/0+$/, '')}`;
 };
 
-const getGenericInstructionSummary = (instruction: any): string => {
+const getGenericInstructionSummary = (instruction: SolanaInstruction): string => {
     if (instruction.parsed?.type) {
         const info = instruction.parsed.info || {};
 
@@ -315,13 +2478,13 @@ export const getProgramName = (programId: string): string => {
         '11111111111111111111111111111111': 'System Program',
         'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA': 'Token Program',
         'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL': 'Associated Token Program'
-    };
+    }
 
     return knownPrograms[programId] || `Unknown Program (${programId.slice(0, 8)}...)`;
 };
 
 
-export const decodeInstruction = (instruction: any): DecodedInstruction => {
+export const decodeInstruction = (instruction: SolanaInstruction): DecodedInstruction => {
     const programId = instruction.programId?.toString();
     const data = instruction.data;
 
@@ -354,7 +2517,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                     let summary = '';
 
                     switch (matchingInstruction.name) {
-                        case 'depositCollateral': {
+                        case 'deposit_collateral': {
                             if (dataBytes.length >= 16) {
                                 const amount = readBigInt64LE(dataBytes, 8);
                                 decodedArgs.amount = amount.toString();
@@ -365,7 +2528,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'giveLiquidity': {
+                        case 'give_liquidity': {
                             if (dataBytes.length >= 16) {
                                 const amount = readBigInt64LE(dataBytes, 8);
                                 decodedArgs.amount = amount.toString();
@@ -376,7 +2539,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'liquidateUser': {
+                        case 'liquidate_user': {
                             if (dataBytes.length >= 24) {
                                 const debtToCover = readBigInt64LE(dataBytes, 8);
                                 const newPrice = readBigInt64LE(dataBytes, 16);
@@ -389,7 +2552,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'mintDsc': {
+                        case 'mint_dsc': {
                             if (dataBytes.length >= 24) {
                                 const amount = readBigInt64LE(dataBytes, 8);
                                 const newPrice = readBigInt64LE(dataBytes, 16);
@@ -402,12 +2565,12 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'redeemLiquidity': {
+                        case 'redeem_liquidity': {
                             summary = 'Redeemed liquidity';
                             break;
                         }
 
-                        case 'startEngine': {
+                        case 'start_engine': {
                             if (dataBytes.length >= 40) {
                                 const liquidationThreshold = readBigInt64LE(dataBytes, 8);
                                 const minHealthFactor = readBigInt64LE(dataBytes, 16);
@@ -424,7 +2587,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'startToken': {
+                        case 'start_token': {
                             if (dataBytes.length >= 16) {
                                 const price = readBigInt64LE(dataBytes, 8);
                                 decodedArgs.price = price.toString();
@@ -446,7 +2609,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
                             break;
                         }
 
-                        case 'withdrawCollateral': {
+                        case 'withdraw_collateral': {
                             if (dataBytes.length >= 24) {
                                 const dscToGive = readBigInt64LE(dataBytes, 8);
                                 const newPrice = readBigInt64LE(dataBytes, 16);
@@ -480,7 +2643,7 @@ export const decodeInstruction = (instruction: any): DecodedInstruction => {
 
     // Fallback for other programs or failed decoding
     return {
-        instructionName: instruction.parsed?.type || instruction.program || 'Unknown',     
+        instructionName: instruction.parsed?.type || instruction.program || 'Failed to Decode',
         summary: getGenericInstructionSummary(instruction),
         args: instruction.parsed?.info || {},
         programId: programId || 'Unknown'

@@ -203,22 +203,22 @@ export default function ConfigList() {
         console.error('Failed to refresh configs:', e)
       }
     } catch (error) {
-      console.error('Transaction failed:', error)
-      let errorMessage = 'Transaction failed'
-      if (error && typeof error === 'object' && 'logs' in error && Array.isArray(error.logs)) {
-        const logs = error.logs as string[]
-        if (logs.some((log) => log.includes('insufficient funds'))) {
-          errorMessage = 'Insufficient token balance. Please check your wallet balance.'
-        } else if (logs.some((log) => log.includes('custom program error'))) {
-          errorMessage = 'Transaction failed. Please try again or check your inputs.'
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message
-      }
-      updateTransactionState(config.tokenMint, {
-        isLoading: false,
-        error: { Logs: [errorMessage] },
-      })
+      // console.error('Transaction failed:', error)
+      // let errorMessage = 'Transaction failed'
+      // if (error && typeof error === 'object' && 'logs' in error && Array.isArray(error.logs)) {
+      //   const logs = error.logs as string[]
+      //   if (logs.some((log) => log.includes('insufficient funds'))) {
+      //     errorMessage = 'Insufficient token balance. Please check your wallet balance.'
+      //   } else if (logs.some((log) => log.includes('custom program error'))) {
+      //     errorMessage = 'Transaction failed. Please try again or check your inputs.'
+      //   }
+      // } else if (error instanceof Error) {
+      //   errorMessage = error.message
+      // }
+      // updateTransactionState(config.tokenMint, {
+      //   isLoading: false,
+      //   error: { Logs: [errorMessage] },
+      // })
     }
   }
 

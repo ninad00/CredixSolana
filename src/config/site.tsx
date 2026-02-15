@@ -11,10 +11,9 @@ export interface SocialLink {
 // Create the main configuration object
 export const siteConfig = {
   name: "CREDIX",
-  url: "https://csesa-iiti.github.io/CSESA-Website/",
-  email: "abhishekmane1911@gmail.com",
-  github: "https://github.com/abhishekmane1911/DeFi",
-  instagram: "https://www.instagram.com/abhishek_mane_1911/",
+  url: "https://ninad00.github.io/CredixSolana/",
+  email: "Credix@gmail.com",
+  github: "https://github.com/ninad00/CredixSolana",
 };
 
 // Create an array of social links for easy mapping in components

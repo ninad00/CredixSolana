@@ -32,7 +32,7 @@ interface User {
     publicKey: string;
     user: string;
     borrowedAmount: string;
-    primaryToken: string;x
+    primaryToken: string; x
     hf: string;
     tokenBalance: string;
     bump: number;
@@ -290,13 +290,13 @@ export default function LiquidatePositions() {
                                         </div>
 
                                         <AnimatePresence>
-                                            {state.error && (
+                                            {/* {state.error && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                                     className="bg-red-900/30 text-red-400 text-sm p-3 border border-red-800 rounded-md flex items-start gap-2">
                                                     <AlertCircleIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
                                                     <span><strong>Error:</strong> {state.error}</span>
                                                 </motion.div>
-                                            )}
+                                            )} */}
                                             {state.txSig && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                                     className="bg-green-900/30 text-green-400 text-sm p-3 border border-green-800 rounded-md flex items-start gap-2">

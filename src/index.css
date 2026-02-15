@@ -2,7 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "vamos";
+  src: url("/vamos.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "nasa";
+  src: url("/nasa.otf") format("opentype");
+}
+
+
+@font-face {
+  font-family: "alegreya";
+  src: url("/alegreya.ttf") format("truetype");
+}
+
+.vamos {
+  font-family: "vamos", sans-serif;
+}
+
+.alegreya {
+  font-family: "alegreya", sans-serif;
+}
+
+.nasa {
+  font-family: "nasa", sans-serif;
+}
+
 @layer base {
+
   /* Light theme variables */
   :root {
     --radius: 0.625rem;
@@ -17,7 +46,7 @@
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0); 
+    --muted-foreground: oklch(0.556 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
@@ -70,7 +99,7 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
-  
+
   /* These other base styles are fine */
   html {
     overflow-x: hidden;
@@ -96,6 +125,7 @@
   }
 
   @media (max-width: 640px) {
+
     button:not(:disabled),
     [role='button']:not(:disabled) {
       min-height: 48px;
@@ -114,7 +144,7 @@
   background-color: hsl(var(--background)) !important;
   color: hsl(var(--accent-foreground)) !important;
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
-  
+
   min-height: 44px !important;
   min-width: 44px !important;
   touch-action: manipulation !important;
