@@ -15,6 +15,10 @@ https://ninad00.github.io/CredixSolana/
 ![image](public/ss1.png)
 ![image](public/ss2.png)
 
+### 📊 Workflow Diagram
+
+For detailed workflow diagrams and architecture documentation, see [WORKFLOW.md](./WORKFLOW.md)
+
 ---
 
 ## 1. Project Overview
